@@ -60,7 +60,39 @@ fn valid(board: &Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> bool {
 }
 
 fn main() {
-    let board: Vec<Vec<u32>> = vec![
+    let easyBoard1 : Vec<Vec<u32>> = vec![
+    // 0's represent empty spaces
+
+    vec![5,6,8, 3,0,9, 4,0,2],
+    vec![0,0,2, 0,0,6, 0,0,0],
+    vec![0,0,7, 4,0,2, 6,3,0],
+
+    vec![0,8,5, 0,0,4, 1,0,0],
+    vec![2,0,9, 0,3,0, 7,0,6],
+    vec![7,0,0, 0,6,1, 0,0,9],
+
+    vec![9,0,0, 5,0,3, 0,1,7],
+    vec![0,0,0, 0,0,7, 0,0,0],
+    vec![0,0,3, 1,9,0, 2,6,0]
+    ];
+
+    let complete_easyBoard1 : Vec<Vec<u32>> = vec![
+        // 0's represent empty spaces
+    
+        vec![5,6,8, 3,0,9, 4,0,2],
+        vec![0,0,2, 0,0,6, 0,0,0],
+        vec![0,0,7, 4,0,2, 6,3,0],
+    
+        vec![0,8,5, 0,0,4, 1,0,0],
+        vec![2,0,9, 0,3,0, 7,0,6],
+        vec![7,0,0, 0,6,1, 0,0,9],
+    
+        vec![9,0,0, 5,0,3, 0,1,7],
+        vec![0,0,0, 0,0,7, 0,0,0],
+        vec![0,0,3, 1,9,0, 2,6,0]
+        ];
+    
+    let test_Moveboard: Vec<Vec<u32>> = vec![
     // 0's represent empty spaces
 
     vec![1,0,0, 0,0,0, 0,0,0],
@@ -76,12 +108,12 @@ fn main() {
     vec![0,0,0, 0,0,0, 0,0,0]
     ];
 
-    print_board(&board);
-    valid(&board, 1, (1,2));    
-    valid(&board, 9, (1,1)); // True
-    valid(&board, 1, (0,1));
-    valid(&board, 1, (1,0));
-    valid(&board, 1, (4,4)); // True
+    print_board(&test_Moveboard);
+    valid(&test_Moveboard, 1, (1,2));    
+    valid(&test_Moveboard, 9, (1,1)); // True
+    valid(&test_Moveboard, 1, (0,1));
+    valid(&test_Moveboard, 1, (1,0));
+    valid(&test_Moveboard, 1, (4,4)); // True
      
 }
 

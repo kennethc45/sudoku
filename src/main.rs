@@ -22,6 +22,7 @@ fn print_board(board: &Vec<Vec<u32>>) {
             }
         }
     }
+    println!("");
 }
 
 fn valid(board: &Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> bool {
@@ -58,42 +59,46 @@ fn valid(board: &Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> bool {
             }
         }
     }
-    // println!("True");
     return true;
 }
 
-fn vaildBoard(board:&Vec<Vec<u32>>) -> bool{
-    for a in 0..board.len(){
-       for b in 0..board.len(){
-          let result = valid(&board,board[a][b],(a as u32,b as u32));
-          if(result == false){
+fn vaildBoard(board: &Vec<Vec<u32>>) -> bool{
+    for a in 0..board.len() {
+       for b in 0..board.len() {
+          let result = valid(&board, board[a][b],(a as u32, b as u32));
+          if (result == false) {
             return false;
           }
        }
     }
     println!("Board is vaild");
     return true;
+}
 
+fn updateBoard(mut board: Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> Vec<Vec<u32>> {
+    board[pos.0 as usize][pos.1 as usize] = val;
+
+    return board;
 }
 
 fn main() {
-    let easyBoard1 : Vec<Vec<u32>> = vec![
-    // 0's represent empty spaces
+    let hintsOnlyBoard: Vec<Vec<u32>> = vec![
+        // 0's represent empty spaces
 
-    vec![5,6,8, 3,0,9, 4,0,2],
-    vec![0,0,2, 0,0,6, 0,0,0],
-    vec![0,0,7, 4,0,2, 6,3,0],
+        vec![5,6,8, 3,0,9, 4,0,2],
+        vec![0,0,2, 0,0,6, 0,0,0],
+        vec![0,0,7, 4,0,2, 6,3,0],
 
-    vec![0,8,5, 0,0,4, 1,0,0],
-    vec![2,0,9, 0,3,0, 7,0,6],
-    vec![7,0,0, 0,6,1, 0,0,9],
+        vec![0,8,5, 0,0,4, 1,0,0],
+        vec![2,0,9, 0,3,0, 7,0,6],
+        vec![7,0,0, 0,6,1, 0,0,9],
 
-    vec![9,0,0, 5,0,3, 0,1,7],
-    vec![0,0,0, 0,0,7, 0,0,0],
-    vec![0,0,3, 1,9,0, 2,6,0]
+        vec![9,0,0, 5,0,3, 0,1,7],
+        vec![0,0,0, 0,0,7, 0,0,0],
+        vec![0,0,3, 1,9,0, 2,6,0]
     ];
 
-    let incomplete_easyBoard1 : Vec<Vec<u32>> = vec![
+    let incompleteBoard: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
     
         vec![5,6,8, 3,0,9, 4,0,2],
@@ -107,9 +112,9 @@ fn main() {
         vec![9,0,6, 5,0,3, 0,1,7],
         vec![0,0,0, 6,0,7, 0,0,0],
         vec![0,7,3, 1,9,0, 2,6,0]
-        ];
+    ];
     
-    let completeBoard1 :Vec<Vec<u32>> = vec![
+    let completeValidBoard: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
     
         vec![6,3,9, 5,7,4, 1,8,2],
@@ -123,9 +128,9 @@ fn main() {
         vec![9,5,6, 7,4,8, 2,3,1],
         vec![8,1,3, 2,9,6, 7,4,5],
         vec![2,7,4, 3,5,1, 6,9,8]
-        ];
+    ];
 
-        let repeatColumnBoard1 :Vec<Vec<u32>> = vec![
+    let repeatColumnBoard: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
     
         vec![6,3,9, 5,7,4, 1,8,2],
@@ -139,9 +144,9 @@ fn main() {
         vec![9,5,6, 7,4,8, 2,3,1],
         vec![8,1,3, 2,9,6, 7,4,5],
         vec![2,7,4, 3,5,1, 6,9,8]
-        ];
+    ];
 
-        let repeatRowBoard1 :Vec<Vec<u32>> = vec![
+    let repeatRowBoard: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
     
         vec![6,3,3, 5,7,4, 1,8,2],
@@ -155,22 +160,22 @@ fn main() {
         vec![9,5,6, 7,4,8, 2,3,1],
         vec![8,1,3, 2,9,6, 7,4,5],
         vec![2,7,4, 3,5,1, 6,9,8]
-        ];
+    ];
 
     let test_Moveboard: Vec<Vec<u32>> = vec![
-    // 0's represent empty spaces
+        // 0's represent empty spaces
 
-    vec![1,0,0, 0,0,0, 0,0,0],
-    vec![0,0,0, 0,0,0, 0,0,0],
-    vec![0,0,0, 0,0,0, 0,0,0],
+        vec![1,0,0, 0,0,0, 0,0,0],
+        vec![0,0,0, 0,0,0, 0,0,0],
+        vec![0,0,0, 0,0,0, 0,0,0],
 
-    vec![0,0,0, 0,0,0, 0,0,0],
-    vec![0,0,0, 0,0,0, 0,0,0],
-    vec![0,0,0, 0,0,0, 0,0,0],
+        vec![0,0,0, 0,0,0, 0,0,0],
+        vec![0,0,0, 0,0,0, 0,0,0],
+        vec![0,0,0, 0,0,0, 0,0,0],
 
-    vec![0,0,0, 0,0,0, 0,0,0],
-    vec![0,0,0, 0,0,0, 0,0,0],
-    vec![0,0,0, 0,0,0, 0,0,0]
+        vec![0,0,0, 0,0,0, 0,0,0],
+        vec![0,0,0, 0,0,0, 0,0,0],
+        vec![0,0,0, 0,0,0, 0,0,0]
     ];
 
     // print_board(&test_Moveboard);
@@ -180,13 +185,16 @@ fn main() {
     // valid(&test_Moveboard, 1, (1,0));
     // valid(&test_Moveboard, 1, (4,4)); // True
 
-    vaildBoard(&incomplete_easyBoard1);
-    vaildBoard(&completeBoard1);
-    vaildBoard(&repeatColumnBoard1);
-    vaildBoard(&repeatRowBoard1);
+    // vaildBoard(&incompleteBoard);
+    // vaildBoard(&completeValidBoard);
+    // vaildBoard(&repeatColumnBoard);
+    // vaildBoard(&repeatRowBoard);
+
+    print_board(&test_Moveboard);
+    updateBoard(test_Moveboard.clone(), 1, (0, 1));
+    print_board(&test_Moveboard);
 
 
-     
 }
 
 

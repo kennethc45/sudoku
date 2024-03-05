@@ -1,3 +1,6 @@
+mod setup;
+use crate::setup::board_generation::generate_eighteen_clues;
+
 fn main() {
-    println!("Hello, world!");
+    generate_eighteen_clues();
 }

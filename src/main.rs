@@ -1,3 +1,7 @@
+
+mod setup;
+use crate::setup::board_generation::generate_eighteen_clues;
+
 fn print_board(board: &Vec<Vec<u32>>) {
 
     for i in 0..board.len() {
@@ -84,6 +88,7 @@ fn main() {
     valid(&board, 1, (4,4)); // True
      
 }
+
 
 
 

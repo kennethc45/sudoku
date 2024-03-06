@@ -1,4 +1,4 @@
-
+mod gui;
 mod setup;
 use crate::setup::board_generation::generate_eighteen_clues;
 
@@ -87,6 +87,7 @@ fn main() {
     valid(&board, 1, (1,0));
     valid(&board, 1, (4,4)); // True
      
+    gui::launch_gui();
 }
 
 

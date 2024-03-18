@@ -11,7 +11,6 @@ const PADDING: f32 = 1.0;
 #[derive(Debug, Clone, Copy)]
 enum Message {
     Number(Option<u32>),
-    
 }
 
 #[derive(Default)]
@@ -103,7 +102,7 @@ pub fn launch_gui() -> iced::Result {
 fn get_board() -> [[i32; GRID_SIZE]; GRID_SIZE] {
     // Temporary board, will eventually pull from actual one
     [
-        [5, 3, 0, 0, 7, 0, 0, 0, 0],
+        [9, 3, 0, 0, 7, 0, 0, 0, 0],
         [6, 0, 0, 1, 9, 5, 0, 0, 0],
         [0, 9, 8, 0, 0, 0, 0, 6, 0],
         [8, 0, 0, 0, 6, 0, 0, 0, 3],

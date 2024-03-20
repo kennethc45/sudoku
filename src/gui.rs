@@ -1,21 +1,28 @@
-use iced::application::Appearance;
+use iced::alignment::Vertical;
+// use iced::application::Appearance;
 use iced::{
-    color, executor, theme, widget, Background, Color, Command, Element, Length, Point, Rectangle, Sandbox, Settings, Size
+    alignment, color, executor, theme, widget, Background, Color, Command, ContentFit, Element, Length, Point, Rectangle, Sandbox, Settings, Size
 };
-use iced::widget::{Column, Row, Text, Container, container};
+use iced::widget::{button, container, Button, Column, Container, Row, Text, text, column};
 
 const GRID_SIZE: usize = 9;
-const CELL_SIZE: f32 = 30.0;
+const CELL_SIZE: f32 = 36.0;
 const PADDING: f32 = 1.0;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 enum Message {
-    Number(Option<u32>),
+    ButtonClicked(usize, usize), // Represents a button click with row and column indices
+    TextInputChanged(String, usize, usize), // Represents text input change with row and column indices
 }
+
+
 
 #[derive(Default)]
 struct Grid {
-    matrix: [[i32; GRID_SIZE]; GRID_SIZE],
+    // matrix: [[u32; GRID_SIZE]; GRID_SIZE],
+    matrix: Vec<Vec<u32>>,
+
+    // tile: TileState
 }
 
 
@@ -23,6 +30,7 @@ impl Sandbox for Grid {
     type Message = Message;
 
     fn new() -> Self {
+        // Grid::default()
         Self {
             matrix: get_board()
         }
@@ -33,59 +41,46 @@ impl Sandbox for Grid {
     }
 
     fn update(&mut self, message:Message) {
-        match message {
-            Message::Number(value) => {
-                // Handle number input here
-                println!("Received number: {:?}", value);
-            }
-        }
+
     }
-    // Old view function that only displayed text w/ no interaction
-// fn view(&self) -> iced::Element<'_, Self::Message> {
-    //     let matrix = self.matrix;
-    //     let mut base = Column::new().padding(PADDING).spacing(CELL_SIZE);
-        
-    //     for row in matrix {
-    //         let mut gui_row = Row::new().padding(PADDING).spacing(CELL_SIZE);
-            
-    //         for &value in &row {
-    //             let text = value.to_string();
-    //             let text_element = Text::new(text).size(20);
-    //             gui_row = gui_row.push(text_element);
-    //         }
-            
-    //         base = base.push(gui_row);
-    //     }
-        
-    //     base.into()
-    
-    // }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-        let matrix = self.matrix;
+        let matrix = self.matrix.clone();
         let mut base = Column::new().padding(PADDING).spacing(CELL_SIZE/4.0);
     
-        for row in matrix {
+        for (i,row) in matrix.iter().enumerate() {
             let mut gui_row = Row::new().padding(PADDING).spacing(CELL_SIZE/4.0);
     
-            for value in row {
-                let text = match value {
+            for (j,value) in row.iter().enumerate() {
+                let num = match value {
                     0 => "".to_string(),
                     _ => value.to_string(),
                 };
-                let text_element = Text::new(text)
-                    .size(20);
-                
-                let container = Container::new(text_element)
+
+                let text_element = Text::new(num)
+                    .size(20)
+                    .horizontal_alignment(alignment::Horizontal::Center)
+                    .vertical_alignment(alignment::Vertical::Center);
+                    
+                    
+
+                let button = button(text_element)
                     .width(CELL_SIZE)
                     .height(CELL_SIZE)
-                    .center_x()
-                    .center_y()
-                    .style(theme::Container::Box);
-                    
-                gui_row = gui_row.push(container);
+                    .on_press(Message::ButtonClicked(i, j))
+                    .style(theme::Button::Secondary);
+                
+                if j % 3 == 0 && j != 0 {
+                    gui_row = gui_row.push(Column::new().padding(PADDING));
+                }
+
+                gui_row = gui_row.push(button);
             }
-    
+            
+            if i % 3 == 0 && i != 0 {
+                base = base.push(Row::new().padding(PADDING));
+            }
+
             base = base.push(gui_row);
         }
     
@@ -99,17 +94,17 @@ pub fn launch_gui() -> iced::Result {
     Grid::run(Settings::default())
 }
 
-fn get_board() -> [[i32; GRID_SIZE]; GRID_SIZE] {
+fn get_board() -> Vec<Vec<u32>> {
     // Temporary board, will eventually pull from actual one
-    [
-        [9, 3, 0, 0, 7, 0, 0, 0, 0],
-        [6, 0, 0, 1, 9, 5, 0, 0, 0],
-        [0, 9, 8, 0, 0, 0, 0, 6, 0],
-        [8, 0, 0, 0, 6, 0, 0, 0, 3],
-        [4, 0, 0, 8, 0, 3, 0, 0, 1],
-        [7, 0, 0, 0, 2, 0, 0, 0, 6],
-        [0, 6, 0, 0, 0, 0, 2, 8, 0],
-        [0, 0, 0, 4, 1, 9, 0, 0, 5],
-        [0, 0, 0, 0, 8, 0, 0, 7, 9],
+    vec![
+        vec![9, 3, 0, 0, 7, 0, 0, 0, 0],
+        vec![6, 0, 0, 1, 9, 5, 0, 0, 0],
+        vec![0, 9, 8, 0, 0, 0, 0, 6, 0],
+        vec![8, 0, 0, 0, 6, 0, 0, 0, 3],
+        vec![4, 0, 0, 8, 0, 3, 0, 0, 1],
+        vec![7, 0, 0, 0, 2, 0, 0, 0, 6],
+        vec![0, 6, 0, 0, 0, 0, 2, 8, 0],
+        vec![0, 0, 0, 4, 1, 9, 0, 0, 5],
+        vec![0, 0, 0, 0, 8, 0, 0, 7, 9],
     ]
 }

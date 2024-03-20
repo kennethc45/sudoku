@@ -1,7 +1,7 @@
 use iced::alignment::Vertical;
 // use iced::application::Appearance;
 use iced::{
-    alignment, color, executor, theme, widget, Background, Color, Command, ContentFit, Element, Length, Point, Rectangle, Sandbox, Settings, Size
+    window,alignment, color, executor, theme, widget, Background, Color, Command, ContentFit, Element, Length, Point, Rectangle, Sandbox, Settings, Size
 };
 use iced::widget::{TextInput, button, container, Button, Column, Container, Row, Text, text, column};
 
@@ -27,6 +27,7 @@ struct Grid {
 
 impl Sandbox for Grid {
     type Message = Message;
+    // type Flags = Vec<Vec<u32>>;
 
     fn new() -> Self {
         Self {
@@ -124,7 +125,15 @@ impl Sandbox for Grid {
 }
 
 
-pub fn launch_gui() -> iced::Result {
+pub fn launch_gui(initial_board:&Vec<Vec<u32>>) -> iced::Result {
+    // let settings = Settings {
+    //     flags: initial_board,
+    //     ..Settings::default()
+    // };
+    // let grid = Grid { matrix: *initial_board, awaiting_input: None };
+    // let settings = Settings::with_flags(initial_board);
+    // let settings: Settings<Vec<Vec<u32>>> = Settings::with_flags(initial_board.clone());
+
     Grid::run(Settings::default())
 }
 

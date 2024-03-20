@@ -3,7 +3,7 @@ use iced::alignment::Vertical;
 use iced::{
     alignment, color, executor, theme, widget, Background, Color, Command, ContentFit, Element, Length, Point, Rectangle, Sandbox, Settings, Size
 };
-use iced::widget::{button, container, Button, Column, Container, Row, Text, text, column};
+use iced::widget::{TextInput, button, container, Button, Column, Container, Row, Text, text, column};
 
 const GRID_SIZE: usize = 9;
 const CELL_SIZE: f32 = 36.0;
@@ -12,17 +12,16 @@ const PADDING: f32 = 1.0;
 #[derive(Debug, Clone)]
 enum Message {
     ButtonClicked(usize, usize), // Represents a button click with row and column indices
-    TextInputChanged(String, usize, usize), // Represents text input change with row and column indices
+    // TextInputChanged(String, usize, usize),
+    TextInputChanged(String),
 }
 
 
 
 #[derive(Default)]
 struct Grid {
-    // matrix: [[u32; GRID_SIZE]; GRID_SIZE],
     matrix: Vec<Vec<u32>>,
-
-    // tile: TileState
+    awaiting_input: Option<(usize, usize)>,
 }
 
 
@@ -30,9 +29,9 @@ impl Sandbox for Grid {
     type Message = Message;
 
     fn new() -> Self {
-        // Grid::default()
         Self {
-            matrix: get_board()
+            matrix: get_board(),
+            awaiting_input: None
         }
     }
 
@@ -41,13 +40,39 @@ impl Sandbox for Grid {
     }
 
     fn update(&mut self, message:Message) {
+        match message {
+            Message::ButtonClicked(i, j) => {
 
+                self.awaiting_input = Some((i, j));
+            
+            }
+            Message::TextInputChanged(input) => {
+                let (i,j) = self.awaiting_input.unwrap();
+                match parse_input(input) {
+                    Some(val) => {
+                        self.matrix[i][j] = val;
+                        self.awaiting_input = None;
+                    }
+                    None => {self.awaiting_input = None;}
+                }
+                
+            }
+            _ => {println!("Something horrible has happened");}
+
+        }
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
         let matrix = self.matrix.clone();
         let mut base = Column::new().padding(PADDING).spacing(CELL_SIZE/4.0);
-    
+        // let (mut editRow, mut editCol) = (-1, -1);
+
+        let (edit_row, edit_col) = match self.awaiting_input {
+            Some((row, col)) => {(row,col)}
+            None => {(100, 100)}
+        };
+
+
         for (i,row) in matrix.iter().enumerate() {
             let mut gui_row = Row::new().padding(PADDING).spacing(CELL_SIZE/4.0);
     
@@ -62,8 +87,6 @@ impl Sandbox for Grid {
                     .horizontal_alignment(alignment::Horizontal::Center)
                     .vertical_alignment(alignment::Vertical::Center);
                     
-                    
-
                 let button = button(text_element)
                     .width(CELL_SIZE)
                     .height(CELL_SIZE)
@@ -74,7 +97,18 @@ impl Sandbox for Grid {
                     gui_row = gui_row.push(Column::new().padding(PADDING));
                 }
 
-                gui_row = gui_row.push(button);
+                if i == edit_row && j == edit_col {
+                    let input = TextInput::new(
+                        "",
+                        "",)
+                    .on_input(Message::TextInputChanged)
+                    .width(CELL_SIZE);
+                    
+                    gui_row = gui_row.push(input);
+                } else {
+                    gui_row = gui_row.push(button);
+                }
+                
             }
             
             if i % 3 == 0 && i != 0 {
@@ -107,4 +141,16 @@ fn get_board() -> Vec<Vec<u32>> {
         vec![0, 0, 0, 4, 1, 9, 0, 0, 5],
         vec![0, 0, 0, 0, 8, 0, 0, 7, 9],
     ]
+}
+
+fn parse_input(input:String) -> Option<u32> {
+    // Parse the character into an integer
+    let parsed = input.chars().next()?.to_digit(10)?;
+
+    // Check if the parsed integer is positive and less than or equal to 9
+    if parsed > 0 && parsed <= 9 {
+        Some(parsed)
+    } else {
+        None
+    }
 }

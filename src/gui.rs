@@ -1,22 +1,18 @@
-use iced::alignment::Vertical;
-// use iced::application::Appearance;
 use iced::{
-    window,alignment, color, executor, theme, widget, Background, Color, Command, ContentFit, Element, Length, Point, Rectangle, Sandbox, Settings, Size
+    Application, Command, Theme, alignment, executor, theme, Length, Settings,
 };
-use iced::widget::{TextInput, button, container, Button, Column, Container, Row, Text, text, column};
+use iced::widget::{
+    TextInput, button, Column, Container, Row, Text
+};
 
-const GRID_SIZE: usize = 9;
 const CELL_SIZE: f32 = 36.0;
 const PADDING: f32 = 1.0;
 
 #[derive(Debug, Clone)]
 enum Message {
-    ButtonClicked(usize, usize), // Represents a button click with row and column indices
-    // TextInputChanged(String, usize, usize),
+    ButtonClicked(usize, usize),
     TextInputChanged(String),
 }
-
-
 
 #[derive(Default)]
 struct Grid {
@@ -24,49 +20,65 @@ struct Grid {
     awaiting_input: Option<(usize, usize)>,
 }
 
-
-impl Sandbox for Grid {
+impl Application for Grid {
+    type Executor = executor::Default;
+    type Flags = Vec<Vec<u32>>;
     type Message = Message;
-    // type Flags = Vec<Vec<u32>>;
+    type Theme = Theme;
 
-    fn new() -> Self {
-        Self {
-            matrix: get_board(),
-            awaiting_input: None
-        }
+    fn new(flags: Self::Flags) -> (Self, Command<Self::Message>) {
+        (
+            Grid {
+                matrix: flags,
+                awaiting_input: None,
+            },
+            Command::none(),
+        )
     }
 
     fn title(&self) -> String {
-        String::from("PLEASE HELP ME")
+        String::from("Rust Sudoku")
     }
 
-    fn update(&mut self, message:Message) {
+    fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
         match message {
             Message::ButtonClicked(i, j) => {
-
                 self.awaiting_input = Some((i, j));
-            
+                Command::none()
             }
+
             Message::TextInputChanged(input) => {
-                let (i,j) = self.awaiting_input.unwrap();
-                match parse_input(input) {
-                    Some(val) => {
-                        self.matrix[i][j] = val;
-                        self.awaiting_input = None;
+                match self.awaiting_input {
+                    Some((i,j)) => {
+                        match input.parse().ok() {
+                            Some(val) => {
+                                self.matrix[i][j] = val;
+                                self.awaiting_input = None;
+                                Command::none()
+
+                            }
+                            None => {
+                                self.awaiting_input = None;
+                                Command::none()
+
+                            }
+                        }
                     }
-                    None => {self.awaiting_input = None;}
+                    None => {Command::none()}
                 }
                 
-            }
-            _ => {println!("Something horrible has happened");}
 
+            }
         }
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
         let matrix = self.matrix.clone();
-        let mut base = Column::new().padding(PADDING).spacing(CELL_SIZE/4.0);
-        // let (mut editRow, mut editCol) = (-1, -1);
+        let mut base = Column::new()
+            .padding(PADDING)
+            .spacing(CELL_SIZE/4.0)
+            .align_items(alignment::Alignment::Center);
+        
 
         let (edit_row, edit_col) = match self.awaiting_input {
             Some((row, col)) => {(row,col)}
@@ -119,47 +131,21 @@ impl Sandbox for Grid {
             base = base.push(gui_row);
         }
     
-        base.into()
+        Container::new(base) 
+            .width(Length::Fill) 
+            .height(Length::Fill) 
+            .align_x(alignment::Horizontal::Center)
+            .align_y(alignment::Vertical::Center)
+            .into()
     }
 
 }
 
 
 pub fn launch_gui(initial_board:&Vec<Vec<u32>>) -> iced::Result {
-    // let settings = Settings {
-    //     flags: initial_board,
-    //     ..Settings::default()
-    // };
-    // let grid = Grid { matrix: *initial_board, awaiting_input: None };
-    // let settings = Settings::with_flags(initial_board);
-    // let settings: Settings<Vec<Vec<u32>>> = Settings::with_flags(initial_board.clone());
-
-    Grid::run(Settings::default())
-}
-
-fn get_board() -> Vec<Vec<u32>> {
-    // Temporary board, will eventually pull from actual one
-    vec![
-        vec![9, 3, 0, 0, 7, 0, 0, 0, 0],
-        vec![6, 0, 0, 1, 9, 5, 0, 0, 0],
-        vec![0, 9, 8, 0, 0, 0, 0, 6, 0],
-        vec![8, 0, 0, 0, 6, 0, 0, 0, 3],
-        vec![4, 0, 0, 8, 0, 3, 0, 0, 1],
-        vec![7, 0, 0, 0, 2, 0, 0, 0, 6],
-        vec![0, 6, 0, 0, 0, 0, 2, 8, 0],
-        vec![0, 0, 0, 4, 1, 9, 0, 0, 5],
-        vec![0, 0, 0, 0, 8, 0, 0, 7, 9],
-    ]
-}
-
-fn parse_input(input:String) -> Option<u32> {
-    // Parse the character into an integer
-    let parsed = input.chars().next()?.to_digit(10)?;
-
-    // Check if the parsed integer is positive and less than or equal to 9
-    if parsed > 0 && parsed <= 9 {
-        Some(parsed)
-    } else {
-        None
-    }
+    let settings = Settings {
+        flags: initial_board.clone(),
+        ..Settings::default()
+    };    
+    Grid::run(settings)
 }

@@ -75,13 +75,16 @@ fn vaildBoard(board: &Vec<Vec<u32>>) -> bool{
     return true;
 }
 
-fn updateBoard(mut board: &Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> Vec<Vec<u32>> {
+fn updateBoard(board: &mut Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> &Vec<Vec<u32>> {
     board[pos.0 as usize][pos.1 as usize] = val;
-    let result = valid(&board,board[pos.0][pos.1],(pos.0 as u32,pos.1 as u32));
-    if (result == false){
-        println!("Move is not vaild");
+    
+    let result = valid(&board,board[pos.0 as usize][pos.1 as usize],(pos.0 as u32,pos.1 as u32));
+    if result == false{
+        println!("Move is not vaild,Try again");
     }
-    println!("Move is vaild");
+    else{
+        println!("Move is vaild");
+    }
     return board;
 }
 
@@ -166,7 +169,7 @@ fn main() {
         vec![2,7,4, 3,5,1, 6,9,8]
     ];
 
-    let test_Moveboard: Vec<Vec<u32>> = vec![
+    let mut test_Moveboard: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
 
         vec![1,0,0, 0,0,0, 0,0,0],
@@ -195,7 +198,7 @@ fn main() {
     // vaildBoard(&repeatRowBoard);
 
     print_board(&test_Moveboard);
-    updateBoard(&test_Moveboard.clone(), 1, (0, 1));
+    updateBoard(&mut test_Moveboard, 1, (0, 1));
     print_board(&test_Moveboard);
 
 

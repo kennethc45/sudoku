@@ -75,9 +75,13 @@ fn vaildBoard(board: &Vec<Vec<u32>>) -> bool{
     return true;
 }
 
-fn updateBoard(mut board: Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> Vec<Vec<u32>> {
+fn updateBoard(mut board: &Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> Vec<Vec<u32>> {
     board[pos.0 as usize][pos.1 as usize] = val;
-
+    let result = valid(&board,board[pos.0][pos.1],(pos.0 as u32,pos.1 as u32));
+    if (result == false){
+        println!("Move is not vaild");
+    }
+    println!("Move is vaild");
     return board;
 }
 
@@ -191,8 +195,10 @@ fn main() {
     // vaildBoard(&repeatRowBoard);
 
     print_board(&test_Moveboard);
-    updateBoard(test_Moveboard.clone(), 1, (0, 1));
+    updateBoard(&test_Moveboard.clone(), 1, (0, 1));
     print_board(&test_Moveboard);
+
+
 
 
 }

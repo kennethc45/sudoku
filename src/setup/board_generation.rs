@@ -183,3 +183,49 @@ fn backtracking_needed_check (remaining_nums: &Vec<u32>, board: &Vec<Vec<u32>>, 
     if valid_nums.len() < 2 {true} //The 2 is arbitrary can be changed to a different value
     else {false}
 }
+
+pub fn generate_solve_board(board: &Vec<Vec<u32>>) -> Vec<Vec<u32>>{
+    
+}
+
+fn fill_individual_spot(board: &Vec<Vec<u32>>, value:u32, pos:(u32,u32)) -> ((usize,usize),u32) {
+    let mut numbers: Vec<u32> = 
+        vec![
+            1,2,3,4,5,6,7,8,9
+        ];
+    
+    let validity = valid(&board, value, (pos.0, pos.1));
+    if validity {
+        return ((pos.0 as usize, pos.1 as usize), value)
+    }
+    else {
+        for &num in &numbers{
+            if valid(&board,num,(pos.0,pos.1)){
+                return ((pos.0 as usize, pos.1 as usize), num)
+            }
+        }
+    ((0,0),0)
+    }
+}
+
+fn pick_number_for_cell(number_collection: &Vec<u32>) -> u32 {
+    if number_collection.is_empty() {
+        100
+    }
+    else {
+        //Generating random index based on current length of vector
+        let number_of_options = number_collection.len();
+        let index:u32 = rand::thread_rng().gen_range(0..number_of_options) as u32;
+        index
+    }
+}
+
+fn backtracking_needed_check_spot(pos: &mut (usize, usize)) -> (usize,usize) {
+    if (pos.0 == 0 && pos.1 != 0) {
+        pos.0 = 9;
+        pos.1 = pos.1 - 1;
+    } else {
+        pos.0 = pos.0 - 1;
+    }
+    return (pos.0,pos.1);
+}

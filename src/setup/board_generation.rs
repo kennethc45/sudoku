@@ -185,7 +185,30 @@ fn backtracking_needed_check (remaining_nums: &Vec<u32>, board: &Vec<Vec<u32>>, 
 }
 
 pub fn generate_solve_board(board: &Vec<Vec<u32>>) -> Vec<Vec<u32>>{
-    
+    let mut hints: Vec<(usize, usize)> = vec![];
+    for i in 0..board.len() {
+        for j in 0..board[0].len() {
+            if board[i][j] != 0 {
+                hints.push((i, j));
+            }
+        }
+    }
+
+    for i in 0..board.len(){
+        let mut pos:(u32, u32) = (i as u32, 0 as u32);
+        let value = rand::thread_rng().gen_range(0..9);
+        if !hints.contains(&pos) {
+            let pos_value = fill_individual_spot(&board, value, pos);
+            if pos_value == ((0,0),0){
+                backtracking_needed_check_spot(pos)
+            }
+        }
+    }
+
+
+
+    let full_board:Vec<Vec<u32> = vec![vec![0, board[0].len()],board.len()];
+    full_board;
 }
 
 fn fill_individual_spot(board: &Vec<Vec<u32>>, value:u32, pos:(u32,u32)) -> ((usize,usize),u32) {

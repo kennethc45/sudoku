@@ -184,7 +184,7 @@ fn backtracking_needed_check (remaining_nums: &Vec<u32>, board: &Vec<Vec<u32>>, 
     else {false}
 }
 
-pub fn generate_solve_board(board: &Vec<Vec<u32>>) -> Vec<Vec<u32>>{
+pub fn generate_solve_board(board: &mut Vec<Vec<u32>>) -> &Vec<Vec<u32>>{
     let mut hints: Vec<(usize, usize)> = vec![];
     for i in 0..board.len() {
         for j in 0..board[0].len() {
@@ -195,39 +195,39 @@ pub fn generate_solve_board(board: &Vec<Vec<u32>>) -> Vec<Vec<u32>>{
     }
 
     for i in 0..board.len(){
-        let mut pos:(u32, u32) = (i as u32, 0 as u32);
+        let mut pos:(usize, usize) = (i as usize, 0 as usize);
         let value = rand::thread_rng().gen_range(0..9);
         if !hints.contains(&pos) {
-            let pos_value = fill_individual_spot(&board, value, pos);
-            if pos_value == ((0,0),0){
-                backtracking_needed_check_spot(pos)
-            }
-        }
+            let pos_value = fill_individual_spot(board, value, pos);
+            if pos_value == board {
+                backtracking_needed_check_spot(&mut pos);
+            };
+        };
     }
 
-
-
-    let full_board:Vec<Vec<u32> = vec![vec![0, board[0].len()],board.len()];
-    full_board;
+    return board;
 }
 
-fn fill_individual_spot(board: &Vec<Vec<u32>>, value:u32, pos:(u32,u32)) -> ((usize,usize),u32) {
-    let mut numbers: Vec<u32> = 
+fn fill_individual_spot(board: &mut Vec<Vec<u32>>, value:u32, pos:(usize,usize)) -> &Vec<Vec<u32>> {
+    let numbers: Vec<u32> = 
         vec![
             1,2,3,4,5,6,7,8,9
         ];
     
-    let validity = valid(&board, value, (pos.0, pos.1));
+    let validity = valid(&board, value, (pos.0 as u32, pos.1 as u32));
     if validity {
-        return ((pos.0 as usize, pos.1 as usize), value)
+        board[pos.0 as usize][pos.1 as usize] = value;
+        return board;
     }
     else {
         for &num in &numbers{
-            if valid(&board,num,(pos.0,pos.1)){
-                return ((pos.0 as usize, pos.1 as usize), num)
+            if valid(&board,num,(pos.0 as u32, pos.1 as u32)) {
+                board[pos.0 as usize][pos.1 as usize] = num;
+                return board;
             }
         }
-    ((0,0),0)
+        // Return unedited board
+        return board;
     }
 }
 
@@ -244,7 +244,7 @@ fn pick_number_for_cell(number_collection: &Vec<u32>) -> u32 {
 }
 
 fn backtracking_needed_check_spot(pos: &mut (usize, usize)) -> (usize,usize) {
-    if (pos.0 == 0 && pos.1 != 0) {
+    if pos.0 == 0 && pos.1 != 0 {
         pos.0 = 9;
         pos.1 = pos.1 - 1;
     } else {

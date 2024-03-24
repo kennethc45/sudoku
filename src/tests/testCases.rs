@@ -66,7 +66,7 @@ fn vaildBoard(board: &Vec<Vec<u32>>) -> bool{
     for a in 0..board.len() {
        for b in 0..board.len() {
           let result = valid(&board, board[a][b],(a as u32, b as u32));
-          if (result == false) {
+          if result == false {
             return false;
           }
        }

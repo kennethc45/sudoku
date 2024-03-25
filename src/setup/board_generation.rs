@@ -197,26 +197,19 @@ pub fn generate_solve_board(board: &mut Vec<Vec<u32>>) -> &Vec<Vec<u32>>{
 
     for i in 0..board.len() {
         for j in 0..board[0].len() {
-            let mut pos:(usize, usize) = (i as usize, j as usize);
+            let pos:(usize, usize) = (i as usize, j as usize);
             let value = rand::thread_rng().gen_range(0..9);
             if !hints.contains(&pos) {
-                let current_square = fill_individual_spot(board, value, pos);
-                fill_board(&mut current_square, board);
+                let mut current_square = fill_individual_spot(board, value, pos);
+                if current_square == ((0,0),0) {
+                    backtracking_needed_check_spot(&mut current_square.0);
+                } else {
+                    updateBoard(board, current_square.1, current_square.0);
+                };
             };
         };
-    }
-    return board;   
-}
-
-fn fill_board<'a>(starting_square:&'a mut ((usize,usize), u32), board:&'a mut Vec<Vec<u32>>) -> &'a Vec<Vec<u32>> {
-    if starting_square == ((0,0),0) {
-        let mut backtrack = backtracking_needed_check_spot(board, &mut starting_square.0);
-        let mut current_square = fill_individual_spot(backtrack.1, starting_square.1, *backtrack.0);
-        fill_board(&mut current_square, board);
-    } else {
-        updateBoard(board, starting_square.1, starting_square.0);
     };
-    return board;
+    return board;   
 }
 
 fn fill_individual_spot(board: &mut Vec<Vec<u32>>, value:u32, pos:(usize,usize)) -> ((usize,usize), u32) {
@@ -240,26 +233,24 @@ fn fill_individual_spot(board: &mut Vec<Vec<u32>>, value:u32, pos:(usize,usize))
     }
 }
 
-fn pick_number_for_cell(number_collection: &Vec<u32>) -> u32 {
-    if number_collection.is_empty() {
-        100
-    }
-    else {
-        //Generating random index based on current length of vector
-        let number_of_options = number_collection.len();
-        let index:u32 = rand::thread_rng().gen_range(0..number_of_options) as u32;
-        index
-    }
-}
+// fn pick_number_for_cell(number_collection: &Vec<u32>) -> u32 {
+//     if number_collection.is_empty() {
+//         100
+//     }
+//     else {
+//         //Generating random index based on current length of vector
+//         let number_of_options = number_collection.len();
+//         let index:u32 = rand::thread_rng().gen_range(0..number_of_options) as u32;
+//         index
+//     }
+// }
 
-fn backtracking_needed_check_spot<'a>(board:&'a mut Vec<Vec<u32>>,pos: &'a mut (usize, usize)) -> (&'a(usize, usize), &'a Vec<Vec<u32>>) {
-    board[pos.0 as usize][pos.1 as usize] = 0;
-
-    if pos.1 == 0 && pos.0 != 0 {
-        pos.0 = pos.0 - 1;
-        pos.1 = 9;
-    } else {
+fn backtracking_needed_check_spot(pos: &mut (usize, usize)) -> (usize, usize) {
+    if pos.0 == 0 && pos.1 != 0 {
+        pos.0 =  9;
         pos.1 = pos.1 - 1;
+    } else {
+        pos.0 = pos.0 - 1;
     }
-    return (&(pos.0,pos.1), board);
+    return (pos.0,pos.1);
 }

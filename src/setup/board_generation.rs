@@ -248,7 +248,7 @@ fn fill_individual_spot(board: &mut Vec<Vec<u32>>, value:u32, pos:(usize,usize))
 fn backtracking_needed_check_spot(pos: &mut (usize, usize)) -> (usize, usize) {
     if pos.1 == 0 && pos.0 != 0 {
         pos.0 =  pos.0 - 1;
-        pos.1 = 9;
+        pos.1 = 8;
     } else {
         pos.1 = pos.1 - 1;
     }

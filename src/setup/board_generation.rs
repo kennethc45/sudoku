@@ -197,11 +197,17 @@ pub fn generate_solve_board(board: &mut Vec<Vec<u32>>) -> &Vec<Vec<u32>>{
 
     for i in 0..board.len() {
         for j in 0..board[0].len() {
+            print_board(&board);
+            println!("");
+            println!("----------------------------");
+            println!("");
             let pos:(usize, usize) = (i as usize, j as usize);
-            let value = rand::thread_rng().gen_range(0..9);
+            //let value = rand::thread_rng().gen_range(1..9);//Might have been problem (0..9) to (1..9)
+            let mut value = 1;
             if !hints.contains(&pos) {
-                let mut current_square = fill_individual_spot(board, value, pos);
+                let mut current_square = fill_individual_spot(board, &mut value, pos);
                 if current_square == ((0,0),0) {
+                    println!("Backtracking");
                     backtracking_needed_check_spot(&mut current_square.0);
                 } else {
                     updateBoard(board, current_square.1, current_square.0);
@@ -212,20 +218,17 @@ pub fn generate_solve_board(board: &mut Vec<Vec<u32>>) -> &Vec<Vec<u32>>{
     return board;   
 }
 
-fn fill_individual_spot(board: &mut Vec<Vec<u32>>, value:u32, pos:(usize,usize)) -> ((usize,usize), u32) {
-    let numbers: Vec<u32> = 
-        vec![
-            1,2,3,4,5,6,7,8,9
-        ];
+fn fill_individual_spot(board: &mut Vec<Vec<u32>>, value: &mut u32, pos:(usize,usize)) -> ((usize,usize), u32) {
     
-    let validity = valid(&board, value, (pos.0 as u32, pos.1 as u32));
+    let validity = valid(&board, *value, (pos.0 as u32, pos.1 as u32));
     if validity {
-        return ((pos.0, pos.1), value);
+        return ((pos.0, pos.1), *value);
     }
     else {
-        for &num in &numbers{
-            if valid(&board,num,(pos.0 as u32, pos.1 as u32)) {
-                return ((pos.0, pos.1), num)
+        for _ in 1..8 {
+            *value += 1;
+            if valid(&board, *value,(pos.0 as u32, pos.1 as u32)) {
+                return ((pos.0, pos.1), *value)
             }
         }
         // Return unedited board
@@ -246,12 +249,8 @@ fn fill_individual_spot(board: &mut Vec<Vec<u32>>, value:u32, pos:(usize,usize))
 // }
 
 fn backtracking_needed_check_spot(pos: &mut (usize, usize)) -> (usize, usize) {
-    if pos.1 == 0 && pos.0 != 0 {
-        pos.0 =  pos.0 - 1;
-        pos.1 = 8;
-    } else {
-        pos.1 = pos.1 - 1;
-    }
-
-    return (pos.0,pos.1);
+    // [First][Second]
+    // First number is row; Second number is column
+    return (100,100)
+    
 }

@@ -89,7 +89,7 @@ pub fn updateBoard(board: &mut Vec<Vec<u32>>, val: u32, pos: (usize, usize)) -> 
 }
 
 pub fn main2() {
-    let hints_Only_Board: Vec<Vec<u32>> = vec![
+    let mut hints_Only_Board: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
 
         vec![5,6,8, 3,0,9, 4,0,2],

@@ -1,6 +1,6 @@
 use crate::setup::utilities::valid;
 use crate::setup::utilities::every_spot_full;
-use crate::tests::test_cases::valid_board;
+use crate::setup::utilities::valid_board;
 use crate::setup::board_generation::generate_eighteen_clues;
 
 use iced::{
@@ -73,7 +73,6 @@ impl Application for Grid {
                                     self.matrix[i][j] = val;
                                 } else {
                                     println!("Invalid move!");
-
                                 }
                                 
                                 self.awaiting_input = None;
@@ -99,11 +98,13 @@ impl Application for Grid {
                 self.matrix = generate_eighteen_clues();
                 self.clues_positions = find_clues_locations(&self.matrix);
                 self.awaiting_input = None;
+                self.finished = false;
                 Command::none()
             }
 
             Message::ResetBoard => {
                 self.matrix = reset_board(&self.matrix, &self.clues_positions);
+                self.finished = false;
                 Command::none()
             }
 
@@ -120,7 +121,6 @@ impl Application for Grid {
 
         let mut sudoku_app = Row::new()
             .padding(PADDING)
-            // .spacing(50)
             .align_items(alignment::Alignment::Center);
 
         let mut base = Column::new()
@@ -191,13 +191,10 @@ impl Application for Grid {
             base = base.push(gui_row);
         }
 
-
-
         let subtitle = Text::new("By Olivia, Kenneth, Jace, and Jorge")
             .size(20)
             .horizontal_alignment(alignment::Horizontal::Center)
             .vertical_alignment(alignment::Vertical::Center);
-
 
         base = base.push(subtitle);
         sudoku_app = sudoku_app.push(base);
@@ -207,14 +204,11 @@ impl Application for Grid {
             .spacing(CELL_SIZE/4.0)
             .align_items(alignment::Alignment::Center);
 
-        
-
         side_panel = side_panel.push(make_button("New Board", Message::MakeNewBoard));
         side_panel = side_panel.push(make_button("Reset Board", Message::ResetBoard));
         side_panel = side_panel.push(make_button("Exit", Message::ExitApp));
 
         sudoku_app = sudoku_app.push(side_panel);
-
 
         Container::new(sudoku_app) 
             .width(Length::Fill) 

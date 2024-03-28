@@ -1,4 +1,6 @@
 use crate::setup::utilities::valid;
+use crate::setup::utilities::every_spot_full;
+use crate::tests::test_cases::valid_board;
 use iced::{
     window, Application, Command, Theme, alignment, executor, theme, Length, Settings,
 };
@@ -19,7 +21,8 @@ enum Message {
 struct Grid {
     matrix: Vec<Vec<u32>>,
     awaiting_input: Option<(usize, usize)>,
-    clues_positions: Vec<(usize, usize)>
+    clues_positions: Vec<(usize, usize)>,
+    finished: bool
 }
 
 impl Application for Grid {
@@ -34,6 +37,7 @@ impl Application for Grid {
                 clues_positions: find_clues_locations(&flags),
                 matrix: flags,
                 awaiting_input: None,
+                finished: false
             },
             Command::none(),
         )
@@ -46,27 +50,35 @@ impl Application for Grid {
     fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
         match message {
             Message::ButtonClicked(i, j) => {
-                if !self.clues_positions.contains(&(i, j)) {
+                if !self.clues_positions.contains(&(i, j)) && !self.finished {
                     self.awaiting_input = Some((i, j));
                 }
                 Command::none()
             }
     
             Message::TextInputChanged(input) => {
-                match self.awaiting_input { // Is there a text box 
+                match self.awaiting_input { // Is there a text box open rn 
                     Some((i, j)) => {
                         match input.parse().ok() {
                             Some(val) => {
                                 // Place where user types valid number
                                 // Should do validity checks here probably
-                                if valid(&self.matrix, val, (i.try_into().unwrap(), j.try_into().unwrap())) {
+                                if valid(&self.matrix, val, (i as u32, j as u32)) || val == 0 {
                                     self.matrix[i][j] = val;
+                                } else {
+                                    println!("Invalid move!")
                                 }
                                 
                                 self.awaiting_input = None;
+
+                                if every_spot_full(&self.matrix) && valid_board(&self.matrix) {
+                                    println!("CONGRATS YOU WIN WOOOOO");
+                                    self.finished = true;
+                                }
                                 Command::none()
                             }
                             None => {
+                                println!("Invalid new value!");
                                 self.awaiting_input = None;
                                 Command::none()
                             }
@@ -81,19 +93,26 @@ impl Application for Grid {
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
         let matrix = self.matrix.clone();
+
         let mut base = Column::new()
             .padding(PADDING)
             .spacing(CELL_SIZE/4.0)
             .align_items(alignment::Alignment::Center);
-        
+
+        let title_card = Text::new("Rust Sudoku!")
+            .size(40)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center);
+
+        base = base.push(title_card);
 
         let (edit_row, edit_col) = match self.awaiting_input {
-            Some((row, col)) => {(row,col)}
+            Some((r, c)) => {(r,c)}
             None => {(100, 100)}
         };
 
 
-        for (i,row) in matrix.iter().enumerate() {
+        for (i,row)  in matrix.iter().enumerate() {
             let mut gui_row = Row::new().padding(PADDING).spacing(CELL_SIZE/4.0);
     
             for (j,value) in row.iter().enumerate() {
@@ -109,6 +128,7 @@ impl Application for Grid {
                     .horizontal_alignment(alignment::Horizontal::Center)
                     .vertical_alignment(alignment::Vertical::Center);
                     
+                    
                 let button = button(text_element)
                     .width(CELL_SIZE)
                     .height(CELL_SIZE)
@@ -121,16 +141,12 @@ impl Application for Grid {
 
                 if i == edit_row && j == edit_col {
 
-                    // let text_id = Id::unique();
-                    // let text_id = Id::new(format!("text_input_{}_{}", i, j));
-
                     let input = TextInput::new(
                         "",
                         "",)
                     .on_input(Message::TextInputChanged)
                     .size(20)
                     .width(CELL_SIZE);           
-                    // .id(text_id.clone());
 
                     gui_row = gui_row.push(input);
                 } else {
@@ -145,12 +161,21 @@ impl Application for Grid {
 
             base = base.push(gui_row);
         }
-    
+        
+        let subtitle = Text::new("By Olivia, Kenneth, Jace, and Jorge")
+            .size(20)
+            .horizontal_alignment(alignment::Horizontal::Center)
+            .vertical_alignment(alignment::Vertical::Center);
+
+
+        base = base.push(subtitle);
+
         Container::new(base) 
             .width(Length::Fill) 
             .height(Length::Fill) 
             .align_x(alignment::Horizontal::Center)
             .align_y(alignment::Vertical::Center) 
+            .style(theme::Container::Transparent)
             .into()
     }
 

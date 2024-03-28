@@ -132,3 +132,68 @@ pub fn every_spot_full(board: &Vec<Vec<u32>>) -> bool {
     }
     return true
 }
+
+
+fn valid_board_helper(board: &Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> bool {
+    // Column - pos[0]; Row - pos[1]
+    // Checks if there is a repeat of the value in the position's column
+    for i in 0..board.len() {
+        if (board[pos.0 as usize][i] == val) && (pos.1 != i.try_into().unwrap()) {
+            println!("Invalid board");
+            println!("repeat in row: {}", i);
+            return false;
+        }
+    }
+
+    // Checks if there is a repeat of the value in the position's row
+    for i in 0..board[0].len() {
+        if (board[i][pos.1 as usize] == val) && (pos.0 != i.try_into().unwrap()) {
+            println!("Invalid board");
+            println!("repeat in column: {}", i);
+            return false;
+        }
+    }
+
+    // Checks if there is a repeat of the value in the position's box
+    // The boxes should either be 1, 2, or 3
+    let box_x = pos.0 / 3;
+    let box_y = pos.1 / 3;
+ 
+    for i in (box_x * 3)..(box_x * 3 + 3) {
+        for j in (box_y * 3)..(box_y * 3 + 3) {
+            if (board[i as usize][j as usize] == val) && ((i, j) != pos) {
+                println!("Invalid board");
+                println!("repeat in a box:{}",  box_x);
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+pub fn valid_board(board: &Vec<Vec<u32>>) -> bool{
+    for a in 0..board.len() {
+       for b in 0..board[0].len() {
+          let result = valid_board_helper(&board, board[a][b],(a as u32, b as u32));
+          if result == false {
+            println!("False");
+            return false;
+          }
+       }
+    }
+    println!("True");
+    return true;
+}
+
+pub fn update_board(board: &mut Vec<Vec<u32>>, val: u32, pos: (usize, usize)) -> &Vec<Vec<u32>> {
+    board[pos.0][pos.1 ] = val;
+    
+    let result = valid(&board,board[pos.0][pos.1],(pos.0 as u32, pos.1 as u32));
+    if result == false{
+        println!("Move is not vaild,Try again");
+    }
+    else {
+        println!("Move is vaild");
+    }
+    return board;
+}

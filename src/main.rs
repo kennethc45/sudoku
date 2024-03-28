@@ -3,8 +3,7 @@ mod tests;
 mod gui;
 use crate::setup::board_generation::generate_eighteen_clues;
 use crate::setup::solvability_check::generate_solve_board;
-use crate::setup::utilities::{every_spot_full, print_board};
-use crate::tests::test_cases::valid_board;
+use crate::setup::utilities::{every_spot_full, print_board,valid_board};
 
 fn main() {
     let mut board_found = false;

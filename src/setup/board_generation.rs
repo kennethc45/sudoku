@@ -15,6 +15,8 @@ pub fn generate_eighteen_clues () -> Vec<Vec<u32>> {
     final_board
 }
 
+
+
 fn clues_recursive_helper (quad: u32, clues: &mut Vec<((usize, usize), u32)>, mut remaining_nums: Vec<u32>, num_clues: usize) -> Vec<Vec<u32>> {
     //Recursion stops once there are enough clues generated
     if clues.len() < num_clues {

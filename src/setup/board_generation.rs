@@ -1,16 +1,16 @@
 use rand::Rng;
-use crate::setup::utilities::{print_board, valid, box_compatible, column_compatible, row_compatible, determine_quad, determine_quad_coords, produce_indexes, check_spot_occupied};
+use crate::setup::utilities::{valid, box_compatible, column_compatible, determine_quad, produce_indexes, check_spot_occupied, every_spot_full};
 
-pub fn generate_twenty_clues () -> Vec<Vec<u32>> {
+//Starts the search for the clues
+pub fn generate_eighteen_clues () -> Vec<Vec<u32>> {
     let mut clues: Vec<((usize, usize), u32)> = Vec::new();
     let numbers_to_place: Vec<u32> = 
         vec![
             1,2,3,4,5,6,7,8,9,
             1,2,3,4,5,6,7,8,9,
-            1,2
         ];
 
-    let final_board: Vec<Vec<u32>> = clues_recursive_helper(1, &mut clues, numbers_to_place, 20);
+    let final_board: Vec<Vec<u32>> = clues_recursive_helper(1, &mut clues, numbers_to_place, 18);
 
     final_board
 }

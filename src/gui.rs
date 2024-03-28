@@ -1,10 +1,9 @@
-use iced::widget::text_input::{self, focus, Id};
-use iced::window::gain_focus;
+use crate::setup::utilities::valid;
 use iced::{
     window, Application, Command, Theme, alignment, executor, theme, Length, Settings,
 };
 use iced::widget::{
-    button, focus_next, text, Column, Container, Row, Text, TextInput
+    button, Column, Container, Row, Text, TextInput
 };
 
 const CELL_SIZE: f32 = 36.0;
@@ -47,8 +46,9 @@ impl Application for Grid {
     fn update(&mut self, message: Self::Message) -> Command<Self::Message> {
         match message {
             Message::ButtonClicked(i, j) => {
-                if !self.clues_positions.contains(&(i, j)) 
-                {self.awaiting_input = Some((i, j));}
+                if !self.clues_positions.contains(&(i, j)) {
+                    self.awaiting_input = Some((i, j));
+                }
                 Command::none()
             }
     
@@ -59,12 +59,10 @@ impl Application for Grid {
                             Some(val) => {
                                 // Place where user types valid number
                                 // Should do validity checks here probably
+                                if valid(&self.matrix, val, (i.try_into().unwrap(), j.try_into().unwrap())) {
+                                    self.matrix[i][j] = val;
+                                }
                                 
-                                // Failed immediate focus attempt
-                                // let text_id = Id::new(format!("text_input_{}_{}", i, j));
-                                // let command:Command<Message> = iced::widget::text_input::focus(text_id);
-    
-                                self.matrix[i][j] = val;
                                 self.awaiting_input = None;
                                 Command::none()
                             }

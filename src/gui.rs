@@ -1,6 +1,8 @@
 use crate::setup::utilities::valid;
 use crate::setup::utilities::every_spot_full;
 use crate::tests::test_cases::valid_board;
+use crate::setup::board_generation::generate_eighteen_clues;
+
 use iced::{
     window, Application, Command, Theme, alignment, executor, theme, Length, Settings,
 };
@@ -15,6 +17,9 @@ const PADDING: f32 = 1.0;
 enum Message {
     ButtonClicked(usize, usize),
     TextInputChanged(String),
+    MakeNewBoard,
+    ResetBoard,
+    ExitApp,
 }
 
 #[derive(Default)]
@@ -51,22 +56,24 @@ impl Application for Grid {
         match message {
             Message::ButtonClicked(i, j) => {
                 if !self.clues_positions.contains(&(i, j)) && !self.finished {
+                    // Assigning some value to this opens a text box in view() function
                     self.awaiting_input = Some((i, j));
                 }
                 Command::none()
             }
     
             Message::TextInputChanged(input) => {
-                match self.awaiting_input { // Is there a text box open rn 
+                match self.awaiting_input { // Is there a text box open right now (redundant check)
                     Some((i, j)) => {
                         match input.parse().ok() {
                             Some(val) => {
                                 // Place where user types valid number
-                                // Should do validity checks here probably
+                                
                                 if valid(&self.matrix, val, (i as u32, j as u32)) || val == 0 {
                                     self.matrix[i][j] = val;
                                 } else {
-                                    println!("Invalid move!")
+                                    println!("Invalid move!");
+
                                 }
                                 
                                 self.awaiting_input = None;
@@ -78,7 +85,7 @@ impl Application for Grid {
                                 Command::none()
                             }
                             None => {
-                                println!("Invalid new value!");
+                                println!("Invalid value! Make sure you enter a number 0 - 9");
                                 self.awaiting_input = None;
                                 Command::none()
                             }
@@ -87,12 +94,34 @@ impl Application for Grid {
                     None => Command::none(),
                 }
             }
+
+            Message::MakeNewBoard => {
+                self.matrix = generate_eighteen_clues();
+                self.clues_positions = find_clues_locations(&self.matrix);
+                self.awaiting_input = None;
+                Command::none()
+            }
+
+            Message::ResetBoard => {
+                self.matrix = reset_board(&self.matrix, &self.clues_positions);
+                Command::none()
+            }
+
+            Message::ExitApp => {
+                std::process::exit(0);
+            }
+
         }
     }
     
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
         let matrix = self.matrix.clone();
+
+        let mut sudoku_app = Row::new()
+            .padding(PADDING)
+            // .spacing(50)
+            .align_items(alignment::Alignment::Center);
 
         let mut base = Column::new()
             .padding(PADDING)
@@ -161,7 +190,9 @@ impl Application for Grid {
 
             base = base.push(gui_row);
         }
-        
+
+
+
         let subtitle = Text::new("By Olivia, Kenneth, Jace, and Jorge")
             .size(20)
             .horizontal_alignment(alignment::Horizontal::Center)
@@ -169,8 +200,23 @@ impl Application for Grid {
 
 
         base = base.push(subtitle);
+        sudoku_app = sudoku_app.push(base);
 
-        Container::new(base) 
+        let mut side_panel = Column::new()
+            .padding(20)
+            .spacing(CELL_SIZE/4.0)
+            .align_items(alignment::Alignment::Center);
+
+        
+
+        side_panel = side_panel.push(make_button("New Board", Message::MakeNewBoard));
+        side_panel = side_panel.push(make_button("Reset Board", Message::ResetBoard));
+        side_panel = side_panel.push(make_button("Exit", Message::ExitApp));
+
+        sudoku_app = sudoku_app.push(side_panel);
+
+
+        Container::new(sudoku_app) 
             .width(Length::Fill) 
             .height(Length::Fill) 
             .align_x(alignment::Horizontal::Center)
@@ -210,4 +256,32 @@ fn find_clues_locations(initial_board:&Vec<Vec<u32>>) -> Vec<(usize, usize)> {
         }
     }
     locs
+}
+
+fn reset_board(initial_board:&Vec<Vec<u32>>, initial_coords:&Vec<(usize, usize)>) -> Vec<Vec<u32>> {
+    let mut board = initial_board.clone();
+    for (i,row) in initial_board.iter().enumerate() {
+        for (j,_) in row.iter().enumerate() {
+            if !initial_coords.contains(&(i, j)) {
+                board[i][j] = 0;
+            }
+        }
+
+    }
+    board
+    
+}
+
+fn make_button(text:&str, message:Message) -> iced::widget::Button<'_, Message> {
+    let new_board_text = Text::new(text)
+        .size(18)
+        .horizontal_alignment(alignment::Horizontal::Center)
+        .vertical_alignment(alignment::Vertical::Center);
+
+    button(new_board_text)
+        .width(130)
+        .height(50)
+        .on_press(message)
+        .style(theme::Button::Secondary)
+
 }

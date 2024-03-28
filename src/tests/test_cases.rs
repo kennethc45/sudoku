@@ -2,102 +2,7 @@ use crate::setup::utilities::{valid, valid_board, update_board, print_board,colu
 use std::io::{self, Write};
 
 pub fn main2() {
-    let mut hints_only_board: Vec<Vec<u32>> = vec![
-        // 0's represent empty spaces
-
-        vec![5,6,8, 3,0,9, 4,0,2],
-        vec![0,0,2, 0,0,6, 0,0,0],
-        vec![0,0,7, 4,0,2, 6,3,0],
-
-        vec![0,8,5, 0,0,4, 1,0,0],
-        vec![2,0,9, 0,3,0, 7,0,6],
-        vec![7,0,0, 0,6,1, 0,0,9],
-
-        vec![9,0,0, 5,0,3, 0,1,7],
-        vec![0,0,0, 0,0,7, 0,0,0],
-        vec![0,0,3, 1,9,0, 2,6,0]
-    ];
-
-    let incomplete_board: Vec<Vec<u32>> = vec![
-        // 0's represent empty spaces
-
-        vec![5,6,8, 3,0,9, 4,0,2],
-        vec![0,0,2, 0,0,6, 0,0,0],
-        vec![0,0,7, 4,0,2, 6,3,0],
-
-        vec![6,8,5, 0,0,4, 1,0,0],
-        vec![2,0,9, 0,3,0, 7,0,6],
-        vec![7,0,0, 0,6,1, 0,0,9],
-
-        vec![9,0,6, 5,0,3, 0,1,7],
-        vec![0,0,0, 6,0,7, 0,0,0],
-        vec![0,7,3, 1,9,0, 2,6,0]
-    ];
-
-    let complete_valid_board: Vec<Vec<u32>> = vec![
-        // 0's represent empty spaces
-
-        vec![6,3,9, 5,7,4, 1,8,2],
-        vec![5,4,1, 8,2,9, 3,7,6],
-        vec![7,8,2, 6,1,3, 9,5,4],
-
-        vec![1,9,8, 4,6,7, 5,2,3],
-        vec![3,6,5, 9,8,2, 4,1,7],
-        vec![4,2,7, 1,3,5, 8,6,9],
-
-        vec![9,5,6, 7,4,8, 2,3,1],
-        vec![8,1,3, 2,9,6, 7,4,5],
-        vec![2,7,4, 3,5,1, 6,9,8]
-    ];
-
-    let repeat_column_board: Vec<Vec<u32>> = vec![
-        // 0's represent empty spaces
-
-        vec![6,3,9, 5,7,4, 1,8,2],
-        vec![6,4,1, 8,2,9, 3,7,6],
-        vec![7,8,2, 6,1,3, 9,5,4],
-
-        vec![1,9,8, 4,6,7, 5,2,3],
-        vec![3,6,5, 9,8,2, 4,1,7],
-        vec![4,2,7, 1,3,5, 8,6,9],
-
-        vec![9,5,6, 7,4,8, 2,3,1],
-        vec![8,1,3, 2,9,6, 7,4,5],
-        vec![2,7,4, 3,5,1, 6,9,8]
-    ];
-
-    let repeat_row_board: Vec<Vec<u32>> = vec![
-        // 0's represent empty spaces
-
-        vec![6,3,3, 5,7,4, 1,8,2],
-        vec![5,4,1, 8,2,9, 3,7,6],
-        vec![7,8,2, 6,1,3, 9,5,4],
-
-        vec![1,9,8, 4,6,7, 5,2,3],
-        vec![3,6,5, 9,8,2, 4,1,7],
-        vec![4,2,7, 1,3,5, 8,6,9],
-
-        vec![9,5,6, 7,4,8, 2,3,1],
-        vec![8,1,3, 2,9,6, 7,4,5],
-        vec![2,7,4, 3,5,1, 6,9,8]
-    ];
-
-    let mut test_moveboard: Vec<Vec<u32>> = vec![
-        // 0's represent empty spaces
-
-        vec![1,0,0, 0,0,0, 0,0,0],
-        vec![0,0,0, 0,0,0, 0,0,0],
-        vec![0,0,0, 0,0,0, 0,0,0],
-
-        vec![0,0,0, 0,0,0, 0,0,0],
-        vec![0,0,0, 0,0,0, 0,0,0],
-        vec![0,0,0, 0,0,0, 0,0,0],
-
-        vec![0,0,0, 0,0,0, 0,0,0],
-        vec![0,0,0, 0,0,0, 0,0,0],
-        vec![0,0,0, 0,0,0, 0,0,0]
-    ];
-
+   
 }
 
 #[cfg(test)]
@@ -106,38 +11,26 @@ mod tests {
     //use crate::tests::test_cases::main2;
     use super::*;
 
-    #[test]
-    fn test_print_board(){
-        let complete_valid_board: Vec<Vec<u32>> = vec![
-            // 0's represent empty spaces
+    // #[test]
+    // fn test_print_board(){
+    //     let complete_valid_board: Vec<Vec<u32>> = vec![
+    //         // 0's represent empty spaces
 
-            vec![6,3,9, 5,7,4, 1,8,2],
-            vec![5,4,1, 8,2,9, 3,7,6],
-            vec![7,8,2, 6,1,3, 9,5,4],
+    //         vec![6,3,9, 5,7,4, 1,8,2],
+    //         vec![5,4,1, 8,2,9, 3,7,6],
+    //         vec![7,8,2, 6,1,3, 9,5,4],
 
-            vec![1,9,8, 4,6,7, 5,2,3],
-            vec![3,6,5, 9,8,2, 4,1,7],
-            vec![4,2,7, 1,3,5, 8,6,9],
+    //         vec![1,9,8, 4,6,7, 5,2,3],
+    //         vec![3,6,5, 9,8,2, 4,1,7],
+    //         vec![4,2,7, 1,3,5, 8,6,9],
 
-            vec![9,5,6, 7,4,8, 2,3,1],
-            vec![8,1,3, 2,9,6, 7,4,5],
-            vec![2,7,4, 3,5,1, 6,9,8]
-        ];
+    //         vec![9,5,6, 7,4,8, 2,3,1],
+    //         vec![8,1,3, 2,9,6, 7,4,5],
+    //         vec![2,7,4, 3,5,1, 6,9,8]
+    //     ];
 
-        // let mut buffer = Vec::new();
-
-        // io::stdout().flush().unwrap();
-        // let original_stdout = io::stdout();
-        // let mut new_stdout = io::BufWriter::new(&mut buffer);
-        // io::set_stdout(new_stdout);
-
-        // print_board(&complete_valid_board);
-
-        // io::set_stdout(original_stdout);
-        // let output = String::from_utf8(buffer).expect("Invalid UTF-8 sequence in output");
-
-        // assert_eq!(output.trim(), "")
-    }
+    //     print_board(&complete_valid_board)
+    // }
 
     #[test]
     fn test_vaild_with_valid_board(){
@@ -160,7 +53,7 @@ mod tests {
     }
 
     #[test]
-    fn test_vaild_board_with_valid_board(){
+    fn test_vaild_board_and_update_board(){
         let mut complete_valid_board: Vec<Vec<u32>> = vec![
             // 0's represent empty spaces
 
@@ -176,8 +69,7 @@ mod tests {
             vec![8,1,3, 2,9,6, 7,4,5],
             vec![2,7,4, 3,0,1, 6,9,8]
         ];
-
-        valid(&complete_valid_board,5,(8,4));
+        
         update_board(&mut complete_valid_board, 5,(8,4));
         assert_eq!(true, valid_board(&complete_valid_board));
     }

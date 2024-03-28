@@ -1,17 +1,16 @@
 use rand::Rng;
-use crate::setup::utilities::{print_board, valid, box_compatible, column_compatible, row_compatible, determine_quad, determine_quad_coords, produce_indexes, check_spot_occupied};
-use crate::tests::testCases::updateBoard;
+use crate::setup::utilities::{valid, box_compatible, column_compatible, determine_quad, produce_indexes, check_spot_occupied, every_spot_full};
 
-pub fn generate_twenty_clues () -> Vec<Vec<u32>> {
+//Starts the search for the clues
+pub fn generate_eighteen_clues () -> Vec<Vec<u32>> {
     let mut clues: Vec<((usize, usize), u32)> = Vec::new();
     let numbers_to_place: Vec<u32> = 
         vec![
             1,2,3,4,5,6,7,8,9,
             1,2,3,4,5,6,7,8,9,
-            1,2
         ];
 
-    let final_board: Vec<Vec<u32>> = clues_recursive_helper(1, &mut clues, numbers_to_place, 20);
+    let final_board: Vec<Vec<u32>> = clues_recursive_helper(1, &mut clues, numbers_to_place, 18);
 
     final_board
 }
@@ -183,74 +182,4 @@ fn backtracking_needed_check (remaining_nums: &Vec<u32>, board: &Vec<Vec<u32>>, 
     //Makes the decision based on how many unique and valid numbers are remaining in that quad
     if valid_nums.len() < 2 {true} //The 2 is arbitrary can be changed to a different value
     else {false}
-}
-
-pub fn generate_solve_board(board: &mut Vec<Vec<u32>>) -> &Vec<Vec<u32>>{
-    let mut hints: Vec<(usize, usize)> = vec![];
-    for i in 0..board.len() {
-        for j in 0..board[0].len() {
-            if board[i][j] != 0 {
-                hints.push((i, j));
-            }
-        }
-    }
-
-    for i in 0..board.len() {
-        for j in 0..board[0].len() {
-            print_board(&board);
-            println!("");
-            println!("----------------------------");
-            println!("");
-            let pos:(usize, usize) = (i as usize, j as usize);
-            //let value = rand::thread_rng().gen_range(1..9);//Might have been problem (0..9) to (1..9)
-            let mut value = 1;
-            if !hints.contains(&pos) {
-                let mut current_square = fill_individual_spot(board, &mut value, pos);
-                if current_square == ((0,0),0) {
-                    println!("Backtracking");
-                    backtracking_needed_check_spot(&mut current_square.0);
-                } else {
-                    updateBoard(board, current_square.1, current_square.0);
-                };
-            };
-        };
-    };
-    return board;   
-}
-
-fn fill_individual_spot(board: &mut Vec<Vec<u32>>, value: &mut u32, pos:(usize,usize)) -> ((usize,usize), u32) {
-    
-    let validity = valid(&board, *value, (pos.0 as u32, pos.1 as u32));
-    if validity {
-        return ((pos.0, pos.1), *value);
-    }
-    else {
-        for _ in 1..8 {
-            *value += 1;
-            if valid(&board, *value,(pos.0 as u32, pos.1 as u32)) {
-                return ((pos.0, pos.1), *value)
-            }
-        }
-        // Return unedited board
-        return ((0,0),0)
-    }
-}
-
-// fn pick_number_for_cell(number_collection: &Vec<u32>) -> u32 {
-//     if number_collection.is_empty() {
-//         100
-//     }
-//     else {
-//         //Generating random index based on current length of vector
-//         let number_of_options = number_collection.len();
-//         let index:u32 = rand::thread_rng().gen_range(0..number_of_options) as u32;
-//         index
-//     }
-// }
-
-fn backtracking_needed_check_spot(pos: &mut (usize, usize)) -> (usize, usize) {
-    // [First][Second]
-    // First number is row; Second number is column
-    return (100,100)
-    
 }

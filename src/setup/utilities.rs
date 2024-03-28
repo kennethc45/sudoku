@@ -120,3 +120,15 @@ pub fn check_spot_occupied (row: u32, col: u32, board_state: &Vec<Vec<u32>>) -> 
     if board_state[row as usize][col as usize] != 0 {false}
     else {true}
 }
+
+//Checks to make sure each spot on the board has been given a value (ie. no zeros remaining)
+pub fn every_spot_full(board: &Vec<Vec<u32>>) -> bool {
+    for i in 0..board.len() {
+        for j in 0..board[0].len() {
+            if board[i][j] == 0 {
+                return false
+            }
+        }
+    }
+    return true
+}

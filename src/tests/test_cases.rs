@@ -62,11 +62,11 @@ fn valid(board: &Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> bool {
     return true;
 }
 
-fn vaildBoard(board: &Vec<Vec<u32>>) -> bool{
+pub fn valid_board(board: &Vec<Vec<u32>>) -> bool{
     for a in 0..board.len() {
        for b in 0..board.len() {
           let result = valid(&board, board[a][b],(a as u32, b as u32));
-          if (result == false) {
+          if result == false {
             return false;
           }
        }
@@ -75,10 +75,10 @@ fn vaildBoard(board: &Vec<Vec<u32>>) -> bool{
     return true;
 }
 
-fn updateBoard(board: &mut Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> &Vec<Vec<u32>> {
-    board[pos.0 as usize][pos.1 as usize] = val;
+fn update_board(board: &mut Vec<Vec<u32>>, val: u32, pos: (usize, usize)) -> &Vec<Vec<u32>> {
+    board[pos.0][pos.1 ] = val;
     
-    let result = valid(&board,board[pos.0 as usize][pos.1 as usize],(pos.0 as u32,pos.1 as u32));
+    let result = valid(&board,board[pos.0][pos.1],(pos.0 as u32, pos.1 as u32));
     if result == false{
         println!("Move is not vaild,Try again");
     }
@@ -89,7 +89,7 @@ fn updateBoard(board: &mut Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> &Vec<Vec
 }
 
 pub fn main2() {
-    let hintsOnlyBoard: Vec<Vec<u32>> = vec![
+    let mut hints_only_board: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
 
         vec![5,6,8, 3,0,9, 4,0,2],
@@ -105,7 +105,7 @@ pub fn main2() {
         vec![0,0,3, 1,9,0, 2,6,0]
     ];
 
-    let incompleteBoard: Vec<Vec<u32>> = vec![
+    let incomplete_board: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
     
         vec![5,6,8, 3,0,9, 4,0,2],
@@ -121,7 +121,7 @@ pub fn main2() {
         vec![0,7,3, 1,9,0, 2,6,0]
     ];
     
-    let completeValidBoard: Vec<Vec<u32>> = vec![
+    let complete_valid_board: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
     
         vec![6,3,9, 5,7,4, 1,8,2],
@@ -137,7 +137,7 @@ pub fn main2() {
         vec![2,7,4, 3,5,1, 6,9,8]
     ];
 
-    let repeatColumnBoard: Vec<Vec<u32>> = vec![
+    let repeat_column_board: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
     
         vec![6,3,9, 5,7,4, 1,8,2],
@@ -153,7 +153,7 @@ pub fn main2() {
         vec![2,7,4, 3,5,1, 6,9,8]
     ];
 
-    let repeatRowBoard: Vec<Vec<u32>> = vec![
+    let repeat_row_board: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
     
         vec![6,3,3, 5,7,4, 1,8,2],
@@ -169,7 +169,7 @@ pub fn main2() {
         vec![2,7,4, 3,5,1, 6,9,8]
     ];
 
-    let mut test_Moveboard: Vec<Vec<u32>> = vec![
+    let mut test_moveboard: Vec<Vec<u32>> = vec![
         // 0's represent empty spaces
 
         vec![1,0,0, 0,0,0, 0,0,0],
@@ -197,12 +197,9 @@ pub fn main2() {
     // vaildBoard(&repeatColumnBoard);
     // vaildBoard(&repeatRowBoard);
 
-    print_board(&test_Moveboard);
-    updateBoard(&mut test_Moveboard, 1, (0, 1));
-    print_board(&test_Moveboard);
-
-
-
+    print_board(&test_moveboard);
+    update_board(&mut test_moveboard, 1, (0, 1));
+    print_board(&test_moveboard);
 
 }
 

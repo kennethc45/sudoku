@@ -25,6 +25,7 @@ fn main() {
 
             //Indicates that a board has been found
             board_found = true;
+            /*
             let complete_valid_board: Vec<Vec<u32>> = vec![
                 // 0's represent empty spaces
     
@@ -40,7 +41,8 @@ fn main() {
                 vec![8,1,3, 2,9,6, 7,4,5],
                 vec![2,7,4, 3,0,1, 6,9,8]
             ];
-            gui::launch_gui(&complete_valid_board);
+            */
+            gui::launch_gui(&clues_for_display);
         }
     }
 }

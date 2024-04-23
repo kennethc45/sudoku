@@ -7,30 +7,7 @@ pub fn main2() {
 
 #[cfg(test)]
 mod tests {
-    use crate::setup::utilities::print_board;
-    //use crate::tests::test_cases::main2;
     use super::*;
-
-    // #[test]
-    // fn test_print_board(){
-    //     let complete_valid_board: Vec<Vec<u32>> = vec![
-    //         // 0's represent empty spaces
-
-    //         vec![6,3,9, 5,7,4, 1,8,2],
-    //         vec![5,4,1, 8,2,9, 3,7,6],
-    //         vec![7,8,2, 6,1,3, 9,5,4],
-
-    //         vec![1,9,8, 4,6,7, 5,2,3],
-    //         vec![3,6,5, 9,8,2, 4,1,7],
-    //         vec![4,2,7, 1,3,5, 8,6,9],
-
-    //         vec![9,5,6, 7,4,8, 2,3,1],
-    //         vec![8,1,3, 2,9,6, 7,4,5],
-    //         vec![2,7,4, 3,5,1, 6,9,8]
-    //     ];
-
-    //     print_board(&complete_valid_board)
-    // }
 
     #[test]
     fn test_vaild_with_valid_board(){

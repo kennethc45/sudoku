@@ -1,7 +1,7 @@
 use crate::setup::utilities::valid;
 use crate::setup::utilities::every_spot_full;
 use crate::setup::utilities::valid_board;
-use crate::setup::board_generation::generate_eighteen_clues;
+use crate::setup::board_generation::generate_solvable_clues;
 
 use iced::{
     window, Application, Command, Theme, alignment, executor, theme, Length, Settings,
@@ -95,7 +95,7 @@ impl Application for Grid {
             }
 
             Message::MakeNewBoard => {
-                self.matrix = generate_eighteen_clues();
+                self.matrix = generate_solvable_clues();
                 self.clues_positions = find_clues_locations(&self.matrix);
                 self.awaiting_input = None;
                 self.finished = false;

@@ -1,5 +1,6 @@
 use rand::Rng;
-use crate::setup::utilities::{valid, box_compatible, column_compatible, determine_quad, produce_indexes, check_spot_occupied, every_spot_full};
+use crate::setup::utilities::{valid, box_compatible, column_compatible, determine_quad, produce_indexes, check_spot_occupied, every_spot_full, valid_board, print_board};
+use crate::setup::solvability_check::generate_solve_board;
 
 //Starts the search for the clues
 pub fn generate_eighteen_clues () -> Vec<Vec<u32>> {
@@ -15,7 +16,32 @@ pub fn generate_eighteen_clues () -> Vec<Vec<u32>> {
     final_board
 }
 
+pub fn generate_solvable_clues() -> Vec<Vec<u32>> {
+    let mut board_found = false;
+    let mut clues_for_display: Vec<Vec<u32>> = Vec::new();
 
+    //Goes until it a valid & solvable board has been produced
+    while !board_found {
+        //Generates the hints
+        let mut generated_clues = generate_eighteen_clues();
+        //Keeps a copy for displaying before handing it off to the solveable function
+        clues_for_display = generated_clues.clone();
+        //Attempts to solve the board based on the clues
+        let solved_board = generate_solve_board(&mut generated_clues);
+        //If it gives back a fully filled and valid board its done
+        if every_spot_full(solved_board) && valid_board(solved_board) {
+            println!("Hints: ");
+            print_board(&clues_for_display);
+            println!("");
+            println!("Filled in Board: ");
+            print_board(solved_board);
+
+            //Indicates that a board has been found
+            board_found = true;
+        }
+    }
+    clues_for_display
+}
 
 fn clues_recursive_helper (quad: u32, clues: &mut Vec<((usize, usize), u32)>, mut remaining_nums: Vec<u32>, num_clues: usize) -> Vec<Vec<u32>> {
     //Recursion stops once there are enough clues generated

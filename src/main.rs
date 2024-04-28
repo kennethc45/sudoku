@@ -5,7 +5,22 @@ use crate::setup::board_generation::generate_eighteen_clues;
 use crate::setup::solvability_check::generate_solve_board;
 use crate::setup::utilities::{every_spot_full, print_board,valid_board};
 
-fn main() {
+use std::sync::Arc;
+
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    routing::{get, patch},
+    Json, Router,
+};
+
+use serde::{Deserialize, Serialize};
+use serde_json::json;
+
+use tokio::net::TcpListener;
+
+#[tokio::main]
+async fn main() {
     let mut board_found = false;
     //Goes until it a valid & solvable board has been produced
     while !board_found {
@@ -45,4 +60,25 @@ fn main() {
             gui::launch_gui(&clues_for_display);
         }
     }
+
+    let local_database = Arc::new(vec!["Mark Lewis"]);
+
+    let server_address = std::env::var("SERVER_ADRESS")
+        .unwrap_or("127.0.0.1:3000".to_owned());
+
+    let listener = TcpListener::bind(server_address)
+        .await
+        .expect("Could not create TCP Listener");
+
+    println!("Listening on {}", listener.local_addr().unwrap());
+
+    let app = Router::new()
+        .route("/", get(|| async { "Hello World" }));
+        //.route("/item", get(api::get_item));
+
+    axum::serve(listener, app)
+        .await
+        .expect("Error serving application")
+
+
 }

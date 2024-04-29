@@ -5,18 +5,11 @@ use crate::setup::board_generation::generate_eighteen_clues;
 use crate::setup::solvability_check::generate_solve_board;
 use crate::setup::utilities::{every_spot_full, print_board,valid_board};
 
-use std::sync::Arc;
-
 use axum::{
-    extract::{Path, State},
-    http::StatusCode,
-    routing::{get, patch},
-    Json, Router,
+    routing::{get, post}, Router,
 };
 
 use serde::{Deserialize, Serialize};
-use serde_json::json;
-
 use tokio::net::TcpListener;
 
 #[tokio::main]
@@ -57,11 +50,12 @@ async fn main() {
                 vec![2,7,4, 3,0,1, 6,9,8]
             ];
             */
+            // tokio::spawn(async move {
+            //     gui::launch_gui(&clues_for_display);
+            // });
             gui::launch_gui(&clues_for_display);
         }
     }
-
-    let local_database = Arc::new(vec!["Mark Lewis"]);
 
     let server_address = std::env::var("SERVER_ADRESS")
         .unwrap_or("127.0.0.1:3000".to_owned());
@@ -73,12 +67,45 @@ async fn main() {
     println!("Listening on {}", listener.local_addr().unwrap());
 
     let app = Router::new()
-        .route("/", get(|| async { "Hello World" }));
-        //.route("/item", get(api::get_item));
+        .route("/", get(|| async { "Hello World" }))
+        .route("/post", post(handle_input));
 
     axum::serve(listener, app)
         .await
         .expect("Error serving application")
 
 
+}
+
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Coordinates {
+    x: i32,
+    y: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Input {
+    coordinates: Coordinates,
+    value: i32,
+}
+
+async fn handle_input(data: axum::extract::Json<Input>) -> String {
+    // Process the received JSON data
+    let bounds = if data.coordinates.x < 0 || data.coordinates.x > 8 {
+        "X coordinates must be within 0-8".to_string()
+    } else if data.coordinates.y < 0 || data.coordinates.y > 8 {
+        "Y coordinates must be within 0-8".to_string()
+    } else if data.value < 1 || data.value > 9 {
+        "Values can only be between 1-9".to_string()
+    } else {
+        "Valid Input".to_string()
+    };
+
+    format!("Received coordinates: ({}, {}), Value: {}, {}",
+            data.coordinates.x, 
+            data.coordinates.y, 
+            data.value,
+            bounds
+           )
 }

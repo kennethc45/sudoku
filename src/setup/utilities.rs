@@ -138,7 +138,8 @@ fn valid_board_helper(board: &Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> bool 
     // Column - pos[0]; Row - pos[1]
     // Checks if there is a repeat of the value in the position's column
     for i in 0..board.len() {
-        if (board[pos.0 as usize][i] == val) && (pos.1 != i.try_into().unwrap()) {
+        // if (board[pos.0 as usize][i] == val) && (pos.1 != i.try_into().unwrap()) {
+        if (board[pos.0 as usize][i] == val) && (pos.1 != <usize as TryInto<u32>>::try_into(i).unwrap()) {
             println!("Invalid board");
             println!("repeat in row: {}", i);
             return false;
@@ -147,7 +148,8 @@ fn valid_board_helper(board: &Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> bool 
 
     // Checks if there is a repeat of the value in the position's row
     for i in 0..board[0].len() {
-        if (board[i][pos.1 as usize] == val) && (pos.0 != i.try_into().unwrap()) {
+        // if (board[i][pos.1 as usize] == val) && (pos.0 != i.try_into().unwrap()) {
+        if (board[i][pos.1 as usize] == val) && (pos.0 != <usize as TryInto<u32>>::try_into(i).unwrap()) {
             println!("Invalid board");
             println!("repeat in column: {}", i);
             return false;

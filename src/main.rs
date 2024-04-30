@@ -1,9 +1,7 @@
 mod setup;
 mod tests;
 mod gui;
-use crate::setup::board_generation::generate_eighteen_clues;
-use crate::setup::solvability_check::generate_solve_board;
-use crate::setup::utilities::{every_spot_full, print_board,valid_board};
+use crate::setup::board_generation::generate_solvable_clues;
 
 use axum::response::IntoResponse;
 use axum::Json;
@@ -119,5 +117,4 @@ async fn valid_input(data: axum::extract::Json<Input>) -> impl IntoResponse{
             let is_valid = valid(&mut board, value, (x, y));
 
             Json(is_valid)
-
 }

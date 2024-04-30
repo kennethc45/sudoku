@@ -1,7 +1,9 @@
 mod setup;
 mod tests;
 mod gui;
-use crate::setup::board_generation::generate_solvable_clues;
+use crate::setup::board_generation::generate_eighteen_clues;
+use crate::setup::solvability_check::generate_solve_board;
+use crate::setup::utilities::{every_spot_full, valid_board, print_board};
 
 use axum::response::IntoResponse;
 use axum::Json;

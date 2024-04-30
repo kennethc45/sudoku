@@ -5,6 +5,8 @@ use crate::setup::board_generation::generate_eighteen_clues;
 use crate::setup::solvability_check::generate_solve_board;
 use crate::setup::utilities::{every_spot_full, print_board,valid_board};
 
+use axum::response::IntoResponse;
+use axum::Json;
 use axum::{
     routing::{get, post}, Router,
 };
@@ -66,10 +68,12 @@ async fn main() {
 
     println!("Listening on {}", listener.local_addr().unwrap());
 
+    // Defined endpoints 
     let app = Router::new()
         .route("/", get(|| async { "Hello World" }))
-        .route("/post", post(handle_input));
+        .route("/input", post(valid_input));
 
+    // Launches the local server
     axum::serve(listener, app)
         .await
         .expect("Error serving application")
@@ -80,32 +84,40 @@ async fn main() {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Coordinates {
-    x: i32,
-    y: i32,
+    x: u32,
+    y: u32
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Input {
     coordinates: Coordinates,
-    value: i32,
+    value: u32,
 }
 
-async fn handle_input(data: axum::extract::Json<Input>) -> String {
-    // Process the received JSON data
-    let bounds = if data.coordinates.x < 0 || data.coordinates.x > 8 {
-        "X coordinates must be within 0-8".to_string()
-    } else if data.coordinates.y < 0 || data.coordinates.y > 8 {
-        "Y coordinates must be within 0-8".to_string()
-    } else if data.value < 1 || data.value > 9 {
-        "Values can only be between 1-9".to_string()
-    } else {
-        "Valid Input".to_string()
-    };
+// Reads the users input and checks if it is valid within example board
+async fn valid_input(data: axum::extract::Json<Input>) -> impl IntoResponse{
+    use crate::setup::utilities::valid;
 
-    format!("Received coordinates: ({}, {}), Value: {}, {}",
-            data.coordinates.x, 
-            data.coordinates.y, 
-            data.value,
-            bounds
-           )
+    let Input {coordinates: Coordinates {x, y}, value} = data.0;
+
+    let mut board: Vec<Vec<u32>> = vec![
+    
+                vec![0,0,2, 0,0,0, 0,3,0],
+                vec![0,4,0, 3,0,0, 6,0,0],
+                vec![0,0,0, 0,2,0, 0,0,0],
+    
+                vec![0,0,4, 0,0,0, 0,0,5],
+                vec![0,0,0, 0,8,0, 0,0,7],
+                vec![8,0,0, 0,1,0, 0,0,0],
+    
+                vec![0,0,0, 0,0,0, 0,5,9],
+                vec![0,9,0, 0,0,1, 0,0,0],
+                vec![0,0,7, 0,6,0, 0,0,0]
+            ];
+
+    
+            let is_valid = valid(&mut board, value, (x, y));
+
+            Json(is_valid)
+
 }

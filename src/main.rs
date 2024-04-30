@@ -71,7 +71,8 @@ async fn main() {
     // Defined endpoints 
     let app = Router::new()
         .route("/", get(|| async { "Hello World" }))
-        .route("/input", post(valid_input));
+        .route("/spot_check", post(spot_check))
+        .route("/win_check", post(win_check));
 
     // Launches the local server
     axum::serve(listener, app)
@@ -95,7 +96,7 @@ struct Input {
 }
 
 // Reads the users input and checks if it is valid within example board
-async fn valid_input(data: axum::extract::Json<Input>) -> impl IntoResponse{
+async fn spot_check(data: axum::extract::Json<Input>) -> impl IntoResponse{
     use crate::setup::utilities::valid;
 
     let Input {coordinates: Coordinates {x, y}, value} = data.0;
@@ -119,4 +120,20 @@ async fn valid_input(data: axum::extract::Json<Input>) -> impl IntoResponse{
             let is_valid = valid(&mut board, value, (x, y));
 
             Json(is_valid)
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct SudokuBoard {
+    board: Vec<Vec<u32>>
+}
+
+// Checks if the board is a valid solution.
+async fn win_check(sudoku_board: axum::extract::Json<SudokuBoard>) -> impl IntoResponse {
+
+    let SudokuBoard { board } = sudoku_board.0;
+
+    // If you change one of the values in a valid board to zero it counts as true
+    let is_win = valid_board(&board);
+
+    Json(is_win)
 }

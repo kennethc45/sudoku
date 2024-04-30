@@ -1,5 +1,5 @@
-use crate::setup::utilities::{valid, valid_board, update_board, print_board,column_compatible,row_compatible,box_compatible};
-use std::io::{self, Write};
+use crate::setup::utilities::*;
+// use std::io::{self, Write};
 
 pub fn main2() {
    
@@ -7,6 +7,9 @@ pub fn main2() {
 
 #[cfg(test)]
 mod tests {
+    //use crate::setup::utilities::print_board;
+    //use crate::tests::test_cases::main2;
+
     use super::*;
 
     #[test]

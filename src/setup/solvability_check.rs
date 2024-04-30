@@ -58,7 +58,7 @@ fn solving_recursive_helper(board: &mut Vec<Vec<u32>>, pos: (usize, usize), hint
 }
 
 //Checks if the proposed value can go in the current position and if not finds the next possible one unless none is available in which case it returns 100
-fn fill_cell(board: &mut Vec<Vec<u32>>, value: u32, pos:(usize,usize)) -> u32 {
+pub fn fill_cell(board: &mut Vec<Vec<u32>>, value: u32, pos:(usize,usize)) -> u32 {
     //Prevents numbers greater than 9
     if value > 9 {
         return 100

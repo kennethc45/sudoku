@@ -4,7 +4,8 @@ mod html;
 
 use crate::setup::board_generation::generate_solvable_clues;
 use crate::setup::utilities::valid_board;
-use crate::html::front_end::new_board;
+use setup::solvability_check::generate_solve_board;
+use crate::html::front_end::{new_board, solution_board};
 
 use axum::response::{IntoResponse, Html};
 use axum::Json;
@@ -34,7 +35,8 @@ async fn main() {
         .route("/", get(|| async {"Hello World"}))
         .route("/new_game/", get(|| handle_new_board(address_num)))
         .route("/spot_check", post(spot_check))
-        .route("/win_check", post(win_check));
+        .route("/win_check", post(win_check))
+        .route("/solution", get(|| return_solution(address_num)));
 
     // Launches the local server
     axum::serve(listener, app)
@@ -88,7 +90,7 @@ async fn spot_check(data: axum::extract::Json<Input>) -> impl IntoResponse{
     //         ];
 
     
-            let is_valid = valid(&board, value, (x, y));
+            let is_valid:bool = valid(&board, value, (x, y));
 
             Json(is_valid)
 }
@@ -99,7 +101,7 @@ async fn win_check(sudoku_board: axum::extract::Json<SudokuBoard>) -> impl IntoR
     let SudokuBoard { board } = sudoku_board.0;
 
     // If you change one of the values in a valid board to zero it counts as true
-    let is_win = valid_board(&board);
+    let is_win:bool = valid_board(&board);
 
     Json(is_win)
 }
@@ -108,4 +110,10 @@ async fn handle_new_board(base_address: &str) -> impl IntoResponse {
     let current_board: Vec<Vec<u32>> = generate_solvable_clues();
     print_board(&current_board.clone());
     Html(render!(new_board(), board => current_board, location => base_address))
+}
+
+async fn return_solution(base_address: &str) -> impl IntoResponse {
+    let mut starting_board: Vec<Vec<u32>> = generate_solvable_clues();
+    let solution: Vec<Vec<u32>> = generate_solve_board(&mut starting_board).to_vec();
+    Html(render!(solution_board(), board => solution, location => base_address))
 }

@@ -20,7 +20,6 @@ fn solving_recursive_helper(board: &mut Vec<Vec<u32>>, pos: (usize, usize), hint
 
     //Stops once every spot has a value or it appears to be unsolvable
     if every_spot_full(board) || num_touch > 10000 {
-        //println!("{}", num_touch);
         return board
     }
     //Handles when the position is not a hint

@@ -2,26 +2,44 @@ mod setup;
 mod tests;
 mod html;
 
+use std::cmp::Ordering;
+use std::sync::{Arc, Mutex, MutexGuard};
+
 use crate::setup::board_generation::generate_solvable_clues;
 use crate::setup::utilities::valid_board;
 use crate::html::front_end::new_board;
 
 use axum::response::{IntoResponse, Html};
 use axum::Json;
-use axum::{routing::{get, post}, Router};
+use axum::{routing::{get, post}, Router, extract::State};
 
-use minijinja::{Environment, Template, render};
+use minijinja::render;
 
 use serde::{Deserialize, Serialize};
-use setup::utilities::print_board;
 use tokio::net::TcpListener;
+
+#[derive(Clone)]
+struct AppState {
+    play_boards: Vec<Vec<Vec<u32>>>,
+    current_board: Arc<Mutex<usize>>
+}
 
 #[tokio::main]
 async fn main() {
-    let address_num = "127.0.0.1:3000";
+    //Creating the boards and updating the state to hold them and the current board the user is on
+    let mut boards: Vec<Vec<Vec<u32>>> = Vec::new();
+    for _ in 0..100 {
+        boards.push(generate_solvable_clues());
+    }
+
+    let state = AppState {
+        play_boards: boards,
+        current_board: Arc::new(Mutex::new(0))
+    };
+
 
     let server_address = std::env::var("SERVER_ADRESS")
-        .unwrap_or(address_num.to_owned());
+        .unwrap_or("127.0.0.1:3000".to_owned());
 
     let listener = TcpListener::bind(server_address)
         .await
@@ -32,9 +50,10 @@ async fn main() {
     // Defined endpoints 
     let app = Router::new()
         .route("/", get(|| async {"Hello World"}))
-        .route("/new_game/", get(|| handle_new_board(address_num)))
+        .route("/new_game", get(handle_new_board))
         .route("/spot_check", post(spot_check))
-        .route("/win_check", post(win_check));
+        .route("/win_check", post(win_check))
+        .with_state(state);
 
     // Launches the local server
     axum::serve(listener, app)
@@ -104,8 +123,19 @@ async fn win_check(sudoku_board: axum::extract::Json<SudokuBoard>) -> impl IntoR
     Json(is_win)
 }
 
-async fn handle_new_board(base_address: &str) -> impl IntoResponse {
-    let current_board: Vec<Vec<u32>> = generate_solvable_clues();
-    print_board(&current_board.clone());
-    Html(render!(new_board(), board => current_board, location => base_address))
+//Displays to the user a html page with a new board
+async fn handle_new_board(State(state): State<AppState>) -> impl IntoResponse {
+    let mut current_board:MutexGuard<usize> = state.current_board.lock().expect("Modifying current board.");
+    
+    //Handles incrementing to the next board and wrapping around when the user goes through all of them
+    if current_board.cmp(&99) == Ordering::Equal{
+        *current_board = 0;
+    }
+    else {
+        *current_board = *current_board + 1;
+    }
+
+    //Looking up the current board and calling the method that will return the html for rendering it
+    let current_board: Vec<Vec<u32>> = state.play_boards.get(*current_board).unwrap().to_vec();
+    Html(render!(new_board(), board => current_board))
 }

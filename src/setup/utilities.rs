@@ -181,18 +181,11 @@ pub fn valid_board(board: &Vec<Vec<u32>>) -> bool{
           } else {
             let result = valid_board_helper(&board, board[a][b],(a as u32, b as u32));
             if result == false {
-                println!("False");
                 return false;
             }
           }
-        //   let result = valid_board_helper(&board, board[a][b],(a as u32, b as u32));
-        //   if result == false {
-        //     println!("False");
-        //     return false;
-        //   }
        }
     }
-    println!("True");
     return true;
 }
 

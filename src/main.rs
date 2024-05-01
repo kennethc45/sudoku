@@ -50,40 +50,47 @@ struct Coordinates {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Input {
-    coordinates: Coordinates,
-    value: u32,
-}
-
-// Reads the users input and checks if it is valid within example board
-async fn spot_check(data: axum::extract::Json<Input>) -> impl IntoResponse{
-    use crate::setup::utilities::valid;
-
-    let Input {coordinates: Coordinates {x, y}, value} = data.0;
-
-    let mut board: Vec<Vec<u32>> = vec![
-    
-                vec![0,0,2, 0,0,0, 0,3,0],
-                vec![0,4,0, 3,0,0, 6,0,0],
-                vec![0,0,0, 0,2,0, 0,0,0],
-    
-                vec![0,0,4, 0,0,0, 0,0,5],
-                vec![0,0,0, 0,8,0, 0,0,7],
-                vec![8,0,0, 0,1,0, 0,0,0],
-    
-                vec![0,0,0, 0,0,0, 0,5,9],
-                vec![0,9,0, 0,0,1, 0,0,0],
-                vec![0,0,7, 0,6,0, 0,0,0]
-            ];
-
-            let is_valid = valid(&mut board, value, (x, y));
-
-            Json(is_valid)
+struct SudokuBoard {
+    board: Vec<Vec<u32>>
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct SudokuBoard {
-    board: Vec<Vec<u32>>
+struct Input {
+    coordinates: Coordinates,
+    value: u32,
+    board: SudokuBoard
+}
+
+// Reads the users input and checks if it is valid within board
+async fn spot_check(data: axum::extract::Json<Input>) -> impl IntoResponse{
+    use crate::setup::utilities::valid;
+
+    let Input {
+        coordinates: Coordinates {x, y}, 
+        value,
+        board: SudokuBoard { board }
+    } = data.0;
+
+    // Keep for reference for postman testing
+    // let mut board: Vec<Vec<u32>> = vec![
+    
+    //             vec![0,0,2, 0,0,0, 0,3,0],
+    //             vec![0,4,0, 3,0,0, 6,0,0],
+    //             vec![0,0,0, 0,2,0, 0,0,0],
+    
+    //             vec![0,0,4, 0,0,0, 0,0,5],
+    //             vec![0,0,0, 0,8,0, 0,0,7],
+    //             vec![8,0,0, 0,1,0, 0,0,0],
+    
+    //             vec![0,0,0, 0,0,0, 0,5,9],
+    //             vec![0,9,0, 0,0,1, 0,0,0],
+    //             vec![0,0,7, 0,6,0, 0,0,0]
+    //         ];
+
+    
+            let is_valid = valid(&board, value, (x, y));
+
+            Json(is_valid)
 }
 
 // Checks if the board is a valid solution.

@@ -12,7 +12,10 @@ pub fn new_board() -> &'static str {
                 </tr>
             {% endfor %}
         </table>
-
+        <p></p>
+        <form>
+            <button type="submit" formaction="http://127.0.0.1:3000/new_game"> New Board </button>
+        </form>
     "#;
 }
 

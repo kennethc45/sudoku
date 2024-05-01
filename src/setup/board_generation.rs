@@ -30,13 +30,6 @@ pub fn generate_solvable_clues() -> Vec<Vec<u32>> {
         let solved_board = generate_solve_board(&mut generated_clues);
         //If it gives back a fully filled and valid board its done
         if every_spot_full(solved_board) && valid_board(solved_board) {
-            println!("Hints: ");
-            print_board(&clues_for_display);
-            println!("");
-            println!("Filled in Board: ");
-            print_board(solved_board);
-
-            //Indicates that a board has been found
             board_found = true;
         }
     }

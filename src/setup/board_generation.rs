@@ -3,7 +3,7 @@ use crate::setup::utilities::{valid, box_compatible, column_compatible, determin
 use crate::setup::solvability_check::generate_solve_board;
 
 //Starts the search for the clues
-pub fn generate_eighteen_clues () -> Vec<Vec<u32>> {
+fn generate_eighteen_clues () -> Vec<Vec<u32>> {
     let mut clues: Vec<((usize, usize), u32)> = Vec::new();
     let numbers_to_place: Vec<u32> = 
         vec![

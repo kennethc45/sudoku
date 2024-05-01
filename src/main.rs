@@ -1,47 +1,27 @@
 mod setup;
 mod tests;
-mod gui;
-use crate::setup::board_generation::generate_eighteen_clues;
-use crate::setup::solvability_check::generate_solve_board;
-use crate::setup::utilities::{every_spot_full, valid_board, print_board};
+mod html;
 
-use axum::response::IntoResponse;
+use crate::setup::board_generation::generate_solvable_clues;
+use crate::setup::utilities::valid_board;
+use crate::html::front_end::new_board;
+
+use axum::response::{IntoResponse, Html};
 use axum::Json;
-use axum::{
-    routing::{get, post}, Router,
-};
+use axum::{routing::{get, post}, Router};
+
+use minijinja::{Environment, Template, render};
 
 use serde::{Deserialize, Serialize};
+use setup::utilities::print_board;
 use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
-    let mut board_found = false;
-    //Goes until it a valid & solvable board has been produced
-    while !board_found {
-        //Generates the hints
-        let mut generated_clues = generate_eighteen_clues();
-        //Keeps a copy for displaying before handing it off to the solveable function
-        let clues_for_display = generated_clues.clone();
-        //Attempts to solve the board based on the clues
-        let solved_board = generate_solve_board(&mut generated_clues);
-        //If it gives back a fully filled and valid board its done
-        if every_spot_full(solved_board) && valid_board(solved_board) {
-            println!("Hints: ");
-            print_board(&clues_for_display);
-            println!("");
-            println!("Filled in Board: ");
-            print_board(solved_board);
-
-            //Indicates that a board has been found
-            board_found = true;
-
-            // gui::launch_gui(&clues_for_display);
-        }
-    }
+    let address_num = "127.0.0.1:3000";
 
     let server_address = std::env::var("SERVER_ADRESS")
-        .unwrap_or("127.0.0.1:3000".to_owned());
+        .unwrap_or(address_num.to_owned());
 
     let listener = TcpListener::bind(server_address)
         .await
@@ -51,7 +31,8 @@ async fn main() {
 
     // Defined endpoints 
     let app = Router::new()
-        .route("/", get(|| async { "Hello World" }))
+        .route("/", get(|| async {"Hello World"}))
+        .route("/new_game/", get(|| handle_new_board(address_num)))
         .route("/spot_check", post(spot_check))
         .route("/win_check", post(win_check));
 
@@ -59,8 +40,6 @@ async fn main() {
     axum::serve(listener, app)
         .await
         .expect("Error serving application")
-
-
 }
 
 
@@ -123,4 +102,10 @@ async fn win_check(sudoku_board: axum::extract::Json<SudokuBoard>) -> impl IntoR
     let is_win = valid_board(&board);
 
     Json(is_win)
+}
+
+async fn handle_new_board(base_address: &str) -> impl IntoResponse {
+    let current_board: Vec<Vec<u32>> = generate_solvable_clues();
+    print_board(&current_board.clone());
+    Html(render!(new_board(), board => current_board, location => base_address))
 }

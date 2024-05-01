@@ -38,9 +38,10 @@ async fn main() {
         current_board: Arc::new(Mutex::new(0))
     };
 
+    let address_num = "127.0.0.1:3000";
 
     let server_address = std::env::var("SERVER_ADRESS")
-        .unwrap_or("127.0.0.1:3000".to_owned());
+        .unwrap_or(address_num.to_owned());
 
     let listener = TcpListener::bind(server_address)
         .await
@@ -54,7 +55,7 @@ async fn main() {
         .route("/new_game", get(handle_new_board))
         .route("/spot_check", post(spot_check))
         .route("/win_check", post(win_check))
-        .route("/solution", get(|| return_solution(address_num)));
+        .route("/solution", get(|| return_solution(address_num)))
         .with_state(state);
 
     // Launches the local server

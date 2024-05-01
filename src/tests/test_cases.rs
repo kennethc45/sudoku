@@ -1,10 +1,6 @@
 use crate::setup::utilities::*;
 // use std::io::{self, Write};
 
-pub fn main2() {
-   
-}
-
 #[cfg(test)]
 mod tests {
     //use crate::setup::utilities::print_board;

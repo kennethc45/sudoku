@@ -35,27 +35,8 @@ async fn main() {
 
             //Indicates that a board has been found
             board_found = true;
-            /*
-            let complete_valid_board: Vec<Vec<u32>> = vec![
-                // 0's represent empty spaces
-    
-                vec![6,3,9, 5,7,4, 1,8,2],
-                vec![5,4,1, 8,2,9, 3,7,6],
-                vec![7,8,2, 6,1,3, 9,5,4],
-    
-                vec![1,9,8, 4,6,7, 5,2,3],
-                vec![3,6,5, 9,8,0, 4,1,7],
-                vec![4,2,7, 1,3,5, 8,6,9],
-    
-                vec![9,5,6, 7,4,8, 2,3,1],
-                vec![8,1,3, 2,9,6, 7,4,5],
-                vec![2,7,4, 3,0,1, 6,9,8]
-            ];
-            */
-            // tokio::spawn(async move {
-            //     gui::launch_gui(&clues_for_display);
-            // });
-            gui::launch_gui(&clues_for_display);
+
+            // gui::launch_gui(&clues_for_display);
         }
     }
 
@@ -90,41 +71,47 @@ struct Coordinates {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Input {
-    coordinates: Coordinates,
-    value: u32,
-}
-
-// Reads the users input and checks if it is valid within example board
-async fn spot_check(data: axum::extract::Json<Input>) -> impl IntoResponse{
-    use crate::setup::utilities::valid;
-
-    let Input {coordinates: Coordinates {x, y}, value} = data.0;
-
-    let mut board: Vec<Vec<u32>> = vec![
-    
-                vec![0,0,2, 0,0,0, 0,3,0],
-                vec![0,4,0, 3,0,0, 6,0,0],
-                vec![0,0,0, 0,2,0, 0,0,0],
-    
-                vec![0,0,4, 0,0,0, 0,0,5],
-                vec![0,0,0, 0,8,0, 0,0,7],
-                vec![8,0,0, 0,1,0, 0,0,0],
-    
-                vec![0,0,0, 0,0,0, 0,5,9],
-                vec![0,9,0, 0,0,1, 0,0,0],
-                vec![0,0,7, 0,6,0, 0,0,0]
-            ];
-
-    
-            let is_valid = valid(&mut board, value, (x, y));
-
-            Json(is_valid)
+struct SudokuBoard {
+    board: Vec<Vec<u32>>
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct SudokuBoard {
-    board: Vec<Vec<u32>>
+struct Input {
+    coordinates: Coordinates,
+    value: u32,
+    board: SudokuBoard
+}
+
+// Reads the users input and checks if it is valid within board
+async fn spot_check(data: axum::extract::Json<Input>) -> impl IntoResponse{
+    use crate::setup::utilities::valid;
+
+    let Input {
+        coordinates: Coordinates {x, y}, 
+        value,
+        board: SudokuBoard { board }
+    } = data.0;
+
+    // Keep for reference for postman testing
+    // let mut board: Vec<Vec<u32>> = vec![
+    
+    //             vec![0,0,2, 0,0,0, 0,3,0],
+    //             vec![0,4,0, 3,0,0, 6,0,0],
+    //             vec![0,0,0, 0,2,0, 0,0,0],
+    
+    //             vec![0,0,4, 0,0,0, 0,0,5],
+    //             vec![0,0,0, 0,8,0, 0,0,7],
+    //             vec![8,0,0, 0,1,0, 0,0,0],
+    
+    //             vec![0,0,0, 0,0,0, 0,5,9],
+    //             vec![0,9,0, 0,0,1, 0,0,0],
+    //             vec![0,0,7, 0,6,0, 0,0,0]
+    //         ];
+
+    
+            let is_valid = valid(&board, value, (x, y));
+
+            Json(is_valid)
 }
 
 // Checks if the board is a valid solution.

@@ -176,11 +176,20 @@ fn valid_board_helper(board: &Vec<Vec<u32>>, val: u32, pos: (u32, u32)) -> bool 
 pub fn valid_board(board: &Vec<Vec<u32>>) -> bool{
     for a in 0..board.len() {
        for b in 0..board[0].len() {
-          let result = valid_board_helper(&board, board[a][b],(a as u32, b as u32));
-          if result == false {
-            println!("False");
-            return false;
+          if board[a][b] == 0 {
+            return false 
+          } else {
+            let result = valid_board_helper(&board, board[a][b],(a as u32, b as u32));
+            if result == false {
+                println!("False");
+                return false;
+            }
           }
+        //   let result = valid_board_helper(&board, board[a][b],(a as u32, b as u32));
+        //   if result == false {
+        //     println!("False");
+        //     return false;
+        //   }
        }
     }
     println!("True");

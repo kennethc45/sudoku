@@ -1,66 +1,27 @@
 mod setup;
 mod tests;
-mod gui;
-use crate::setup::board_generation::generate_eighteen_clues;
-use crate::setup::solvability_check::generate_solve_board;
-use crate::setup::utilities::{every_spot_full, valid_board, print_board};
+mod html;
 
-use axum::response::IntoResponse;
+use crate::setup::board_generation::generate_solvable_clues;
+use crate::setup::utilities::valid_board;
+use crate::html::front_end::new_board;
+
+use axum::response::{IntoResponse, Html};
 use axum::Json;
-use axum::{
-    routing::{get, post}, Router,
-};
+use axum::{routing::{get, post}, Router};
+
+use minijinja::{Environment, Template, render};
 
 use serde::{Deserialize, Serialize};
+use setup::utilities::print_board;
 use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
-    let mut board_found = false;
-    //Goes until it a valid & solvable board has been produced
-    while !board_found {
-        //Generates the hints
-        let mut generated_clues = generate_eighteen_clues();
-        //Keeps a copy for displaying before handing it off to the solveable function
-        let clues_for_display = generated_clues.clone();
-        //Attempts to solve the board based on the clues
-        let solved_board = generate_solve_board(&mut generated_clues);
-        //If it gives back a fully filled and valid board its done
-        if every_spot_full(solved_board) && valid_board(solved_board) {
-            println!("Hints: ");
-            print_board(&clues_for_display);
-            println!("");
-            println!("Filled in Board: ");
-            print_board(solved_board);
-
-            //Indicates that a board has been found
-            board_found = true;
-            /*
-            let complete_valid_board: Vec<Vec<u32>> = vec![
-                // 0's represent empty spaces
-    
-                vec![6,3,9, 5,7,4, 1,8,2],
-                vec![5,4,1, 8,2,9, 3,7,6],
-                vec![7,8,2, 6,1,3, 9,5,4],
-    
-                vec![1,9,8, 4,6,7, 5,2,3],
-                vec![3,6,5, 9,8,0, 4,1,7],
-                vec![4,2,7, 1,3,5, 8,6,9],
-    
-                vec![9,5,6, 7,4,8, 2,3,1],
-                vec![8,1,3, 2,9,6, 7,4,5],
-                vec![2,7,4, 3,0,1, 6,9,8]
-            ];
-            */
-            // tokio::spawn(async move {
-            //     gui::launch_gui(&clues_for_display);
-            // });
-            gui::launch_gui(&clues_for_display);
-        }
-    }
+    let address_num = "127.0.0.1:3000";
 
     let server_address = std::env::var("SERVER_ADRESS")
-        .unwrap_or("127.0.0.1:3000".to_owned());
+        .unwrap_or(address_num.to_owned());
 
     let listener = TcpListener::bind(server_address)
         .await
@@ -70,7 +31,8 @@ async fn main() {
 
     // Defined endpoints 
     let app = Router::new()
-        .route("/", get(|| async { "Hello World" }))
+        .route("/", get(|| async {"Hello World"}))
+        .route("/new_game/", get(|| handle_new_board(address_num)))
         .route("/spot_check", post(spot_check))
         .route("/win_check", post(win_check));
 
@@ -78,8 +40,6 @@ async fn main() {
     axum::serve(listener, app)
         .await
         .expect("Error serving application")
-
-
 }
 
 
@@ -116,7 +76,6 @@ async fn spot_check(data: axum::extract::Json<Input>) -> impl IntoResponse{
                 vec![0,0,7, 0,6,0, 0,0,0]
             ];
 
-    
             let is_valid = valid(&mut board, value, (x, y));
 
             Json(is_valid)
@@ -136,4 +95,10 @@ async fn win_check(sudoku_board: axum::extract::Json<SudokuBoard>) -> impl IntoR
     let is_win = valid_board(&board);
 
     Json(is_win)
+}
+
+async fn handle_new_board(base_address: &str) -> impl IntoResponse {
+    let current_board: Vec<Vec<u32>> = generate_solvable_clues();
+    print_board(&current_board.clone());
+    Html(render!(new_board(), board => current_board, location => base_address))
 }

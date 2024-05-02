@@ -135,8 +135,6 @@ async fn win_check(sudoku_board: axum::extract::Json<SudokuBoard>) -> impl IntoR
 
 //Displays to the user a html page with a new board
 async fn handle_new_board(Path(level): Path<u32>, State(state): State<AppState>) -> impl IntoResponse {
-    println!("{:?}", level);
-    
     //Handles updating the difficulty based on the number level passed in the URL
     let mut difficulty:MutexGuard<Level> = state.difficulty.lock().expect("Modifying difficulty.");
     *difficulty = match level {
@@ -145,7 +143,7 @@ async fn handle_new_board(Path(level): Path<u32>, State(state): State<AppState>)
         _ => Level::Hard
     };
 
-    let mut current_board:MutexGuard<usize> = state.current_board.lock().expect("Modifying current board.");
+    let mut current_board:MutexGuard<usize> = state.current_board.lock().expect("Modifying current board index.");
     
     //Handles incrementing to the next board and wrapping around when the user goes through all of them
     if current_board.cmp(&99) == Ordering::Equal{
@@ -164,28 +162,8 @@ async fn handle_start() -> impl IntoResponse {
     Html(render!(start_page()))
 }
 
-// Displays the solution for the current board
-// async fn return_solution(State(state): State<AppState>) -> impl IntoResponse {
-//     let current_board:MutexGuard<usize> = state.current_board.lock().expect("Modifying current board.");
-
-//     //Handles incrementing to the next board and wrapping around when the user goes through all of them
-//     // if current_board.cmp(&99) == Ordering::Equal{
-//     //     *current_board = 0;
-//     // }
-//     // else {
-//     //     *current_board = *current_board + 1;
-//     // }
-
-//     //Looking up the current board and calling the method that will return the html for rendering it
-//     let mut current_board: Vec<Vec<u32>> = state.play_boards.get(*current_board).unwrap().to_vec();
-
-
-//     let solution: Vec<Vec<u32>> = generate_solve_board(&mut current_board).to_vec();
-//     Html(render!(solution_board(), board => solution))
-// }
-
 async fn return_solution(State(state): State<AppState>) -> impl IntoResponse {
-    let current_board_index = *state.current_board.lock().expect("Modifying current board.");
+    let current_board_index = *state.current_board.lock().expect("Accessing current board index.");
 
     // Get the current board from the play_boards vector
     let mut current_board = state.play_boards[current_board_index].clone();

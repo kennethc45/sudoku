@@ -79,7 +79,17 @@ pub fn solution_board() -> &'static str {
                 </tr>
             {% endfor %}
         </table>
+        <button onclick="goBack()">
+            Return to game 
+        </button>
+        <script>
+            function goBack() {
+                window.history.back();
+            }
+        </script>
     "#;
 }
+
+
 
 

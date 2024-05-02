@@ -3,7 +3,7 @@ mod tests;
 mod html;
 
 use setup::solvability_check::generate_solve_board;
-use setup::board_generation::generate_solvable_clues;
+use setup::board_generation::{generate_solvable_clues, change_level};
 use setup::utilities::{valid_board, valid};
 use html::front_end::{new_board, solution_board, start_page};
 
@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-enum Level {
+pub enum Level {
     Easy,
     Medium,
     Hard
@@ -30,7 +30,8 @@ enum Level {
 struct AppState {
     play_boards: Vec<Vec<Vec<u32>>>,
     current_board: Arc<Mutex<usize>>,
-    difficulty: Arc<Mutex<Level>>
+    difficulty: Arc<Mutex<Level>>,
+    board_progress: Arc<Mutex<Vec<Vec<u32>>>>
 }
 
 #[tokio::main]
@@ -42,9 +43,10 @@ async fn main() {
     }
 
     let state = AppState {
-        play_boards: boards,
+        play_boards: boards.clone(),
         current_board: Arc::new(Mutex::new(0)),
-        difficulty: Arc::new(Mutex::new(Level::Hard))
+        difficulty: Arc::new(Mutex::new(Level::Hard)),
+        board_progress: Arc::new(Mutex::new(boards.get(0).unwrap().to_vec()))
     };
 
     let address_num = "127.0.0.1:3000";
@@ -137,24 +139,35 @@ async fn win_check(sudoku_board: axum::extract::Json<SudokuBoard>) -> impl IntoR
 async fn handle_new_board(Path(level): Path<u32>, State(state): State<AppState>) -> impl IntoResponse {
     //Handles updating the difficulty based on the number level passed in the URL
     let mut difficulty:MutexGuard<Level> = state.difficulty.lock().expect("Modifying difficulty.");
+    
     *difficulty = match level {
         1 => Level::Easy,
         2 => Level::Medium,
         _ => Level::Hard
     };
 
-    let mut current_board:MutexGuard<usize> = state.current_board.lock().expect("Modifying current board index.");
+    let mut current_board_index:MutexGuard<usize> = state.current_board.lock().expect("Modifying current board index.");
     
     //Handles incrementing to the next board and wrapping around when the user goes through all of them
-    if current_board.cmp(&99) == Ordering::Equal{
-        *current_board = 0;
+    if current_board_index.cmp(&99) == Ordering::Equal{
+        *current_board_index = 0;
     }
     else {
-        *current_board = *current_board + 1;
+        *current_board_index = *current_board_index + 1;
     }
 
-    //Looking up the current board and calling the method that will return the html for rendering it
-    let current_board: Vec<Vec<u32>> = state.play_boards.get(*current_board).unwrap().to_vec();
+    //Looking up the current board
+    let mut current_board: Vec<Vec<u32>> = state.play_boards.get(*current_board_index).unwrap().to_vec();
+
+    //Making the board easier based on the choosen level
+    current_board = change_level(&mut current_board, level);
+
+    //Updating the state to reflect the board's new difficulty
+    let mut board_progress:MutexGuard<Vec<Vec<u32>>> = state.board_progress.lock().expect("Modifying board progress");
+    
+    *board_progress = current_board.clone();
+
+    //Rendering the page with the board
     Html(render!(new_board(), board => current_board, difficulty => level))
 }
 

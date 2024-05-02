@@ -21,6 +21,9 @@ pub fn new_board() -> &'static str {
                     padding: 10px;
                     border-spacing: 20px;
                     border: 1px solid black;
+                    height: 20px;
+                    width: 20px;
+                    text-align: center;
                 }
             </style>
         </head>
@@ -30,7 +33,11 @@ pub fn new_board() -> &'static str {
             {% for row in range(1,10) %}
                 <tr>
                 {% for col in range(1,10) %}
-                    <td>{{board[row-1][col-1]}}</td>
+                    {% if board[row-1][col-1] == 0 %}
+                        <td> {{" "}} </td>
+                    {% else %}
+                        <td>{{board[row-1][col-1]}}</td>
+                    {% endif %}
                 {% endfor %}
                 </tr>
             {% endfor %}
@@ -65,6 +72,9 @@ pub fn solution_board() -> &'static str {
                     padding: 10px;
                     border-spacing: 20px;
                     border: 1px solid black;
+                    height: 20px;
+                    width: 20px;
+                    text-align: center;
                 }
             </style>
         </head>

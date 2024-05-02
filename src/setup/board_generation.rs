@@ -2,8 +2,42 @@ use rand::Rng;
 use crate::setup::utilities::{valid, box_compatible, column_compatible, determine_quad, produce_indexes, check_spot_occupied, every_spot_full, valid_board, print_board};
 use crate::setup::solvability_check::generate_solve_board;
 
+//Used to make boards easier 
+pub fn change_level(board: &mut Vec<Vec<u32>>, level: u32) -> Vec<Vec<u32>> {
+    //New mutable version of the board that will be changed to be easier
+    let mut new_board = board.clone();
+    
+    //Turning the level into the number of additional clues it gets
+    let num_additional_clues = match level {
+        1 => 27,
+        2 => 18,
+        _ => 0
+    };
+
+    //Finding the solution to the provided board
+    let solution = generate_solve_board(board);
+
+    let mut valid_placement = false;
+
+    //Iterating through and picking random unfilled spots from the solution to fill in on the board
+    for _ in 0..num_additional_clues {
+        valid_placement = false;
+        while !valid_placement {
+            let row = rand::thread_rng().gen_range(0..9);
+            let col = rand::thread_rng().gen_range(0..9);
+    
+            if new_board[row][col] == 0 {
+                new_board[row][col] = solution[row][col];
+                valid_placement = true;
+            }
+        }
+    }
+
+    new_board
+}
+
 //Starts the search for the clues
-fn generate_eighteen_clues () -> Vec<Vec<u32>> {
+fn generate_eighteen_clues() -> Vec<Vec<u32>> {
     let mut clues: Vec<((usize, usize), u32)> = Vec::new();
     let numbers_to_place: Vec<u32> = 
         vec![

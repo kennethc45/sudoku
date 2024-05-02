@@ -1,3 +1,17 @@
+pub fn start_page() -> &'static str {
+    return r#"
+        <!doctype html>
+        <title> Sudoku </title>
+        <h1> Sudoku </h1>
+        <h2> Pick A Difficulty Level </h2>
+        <form>
+            <button type="submit" formaction="http://127.0.0.1:3000/new_game/1"> Easy </button>
+            <button type="submit" formaction="http://127.0.0.1:3000/new_game/2"> Medium </button>
+            <button type="submit" formaction="http://127.0.0.1:3000/new_game/3"> Hard </button>
+        <form>
+    "#;
+}
+
 pub fn new_board() -> &'static str {
     return r#"
         <!doctype html>
@@ -14,7 +28,17 @@ pub fn new_board() -> &'static str {
         </table>
         <p></p>
         <form>
-            <button type="submit" formaction="http://127.0.0.1:3000/new_game"> New Board </button>
+            {% if difficulty == 1 %}
+                <button type="submit" formaction="http://127.0.0.1:3000/new_game/1"> New Board </button>
+            {% elif difficulty == 2 %}
+                <button type="submit" formaction="http://127.0.0.1:3000/new_game/2"> New Board </button>
+            {% else %}
+                <button type="submit" formaction="http://127.0.0.1:3000/new_game/3"> New Board </button>
+            {% endif %}
+        </form>
+        <p></p>
+        <form action="http://127.0.0.1:3000/">
+            <button type="submit"> Return to Home </button>
         </form>
     "#;
 }

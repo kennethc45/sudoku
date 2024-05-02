@@ -2,27 +2,35 @@ mod setup;
 mod tests;
 mod html;
 
+use setup::solvability_check::generate_solve_board;
+use setup::board_generation::generate_solvable_clues;
+use setup::utilities::{valid_board, valid};
+use html::front_end::{new_board, solution_board, start_page};
+
 use std::cmp::Ordering;
 use std::sync::{Arc, Mutex, MutexGuard};
 
-use crate::setup::board_generation::generate_solvable_clues;
-use crate::setup::utilities::valid_board;
-use setup::solvability_check::generate_solve_board;
-use crate::html::front_end::{new_board, solution_board};
-
 use axum::response::{IntoResponse, Html};
 use axum::Json;
-use axum::{routing::{get, post}, Router, extract::State};
+use axum::{routing::{get, post}, Router, extract::{State, Path}};
 
 use minijinja::render;
 
 use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+enum Level {
+    Easy,
+    Medium,
+    Hard
+}
+
 #[derive(Clone)]
 struct AppState {
     play_boards: Vec<Vec<Vec<u32>>>,
-    current_board: Arc<Mutex<usize>>
+    current_board: Arc<Mutex<usize>>,
+    difficulty: Arc<Mutex<Level>>
 }
 
 #[tokio::main]
@@ -35,7 +43,8 @@ async fn main() {
 
     let state = AppState {
         play_boards: boards,
-        current_board: Arc::new(Mutex::new(0))
+        current_board: Arc::new(Mutex::new(0)),
+        difficulty: Arc::new(Mutex::new(Level::Hard))
     };
 
     let address_num = "127.0.0.1:3000";
@@ -51,8 +60,8 @@ async fn main() {
 
     // Defined endpoints 
     let app = Router::new()
-        .route("/", get(|| async {"Hello World"}))
-        .route("/new_game", get(handle_new_board))
+        .route("/", get(handle_start))
+        .route("/new_game/:level", get(handle_new_board))
         .route("/spot_check", post(spot_check))
         .route("/win_check", post(win_check))
         .route("/solution", get(return_solution))
@@ -85,8 +94,6 @@ struct Input {
 
 // Reads the users input and checks if it is valid within board
 async fn spot_check(data: axum::extract::Json<Input>) -> impl IntoResponse{
-    use crate::setup::utilities::valid;
-
     let Input {
         coordinates: Coordinates {x, y}, 
         value,
@@ -127,7 +134,17 @@ async fn win_check(sudoku_board: axum::extract::Json<SudokuBoard>) -> impl IntoR
 }
 
 //Displays to the user a html page with a new board
-async fn handle_new_board(State(state): State<AppState>) -> impl IntoResponse {
+async fn handle_new_board(Path(level): Path<u32>, State(state): State<AppState>) -> impl IntoResponse {
+    println!("{:?}", level);
+    
+    //Handles updating the difficulty based on the number level passed in the URL
+    let mut difficulty:MutexGuard<Level> = state.difficulty.lock().expect("Modifying difficulty.");
+    *difficulty = match level {
+        1 => Level::Easy,
+        2 => Level::Medium,
+        _ => Level::Hard
+    };
+
     let mut current_board:MutexGuard<usize> = state.current_board.lock().expect("Modifying current board.");
     
     //Handles incrementing to the next board and wrapping around when the user goes through all of them
@@ -140,7 +157,11 @@ async fn handle_new_board(State(state): State<AppState>) -> impl IntoResponse {
 
     //Looking up the current board and calling the method that will return the html for rendering it
     let current_board: Vec<Vec<u32>> = state.play_boards.get(*current_board).unwrap().to_vec();
-    Html(render!(new_board(), board => current_board))
+    Html(render!(new_board(), board => current_board, difficulty => level))
+}
+
+async fn handle_start() -> impl IntoResponse {
+    Html(render!(start_page()))
 }
 
 // Displays the solution for the current board

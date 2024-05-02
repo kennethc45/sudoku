@@ -55,7 +55,7 @@ async fn main() {
         .route("/new_game", get(handle_new_board))
         .route("/spot_check", post(spot_check))
         .route("/win_check", post(win_check))
-        .route("/solution", get(|| return_solution(address_num)))
+        .route("/solution", get(return_solution))
         .with_state(state);
 
     // Launches the local server
@@ -143,8 +143,36 @@ async fn handle_new_board(State(state): State<AppState>) -> impl IntoResponse {
     Html(render!(new_board(), board => current_board))
 }
 
-async fn return_solution(base_address: &str) -> impl IntoResponse {
-    let mut starting_board: Vec<Vec<u32>> = generate_solvable_clues();
-    let solution: Vec<Vec<u32>> = generate_solve_board(&mut starting_board).to_vec();
-    Html(render!(solution_board(), board => solution, location => base_address))
+// Displays the solution for the current board
+// async fn return_solution(State(state): State<AppState>) -> impl IntoResponse {
+//     let current_board:MutexGuard<usize> = state.current_board.lock().expect("Modifying current board.");
+
+//     //Handles incrementing to the next board and wrapping around when the user goes through all of them
+//     // if current_board.cmp(&99) == Ordering::Equal{
+//     //     *current_board = 0;
+//     // }
+//     // else {
+//     //     *current_board = *current_board + 1;
+//     // }
+
+//     //Looking up the current board and calling the method that will return the html for rendering it
+//     let mut current_board: Vec<Vec<u32>> = state.play_boards.get(*current_board).unwrap().to_vec();
+
+
+//     let solution: Vec<Vec<u32>> = generate_solve_board(&mut current_board).to_vec();
+//     Html(render!(solution_board(), board => solution))
+// }
+
+async fn return_solution(State(state): State<AppState>) -> impl IntoResponse {
+    let current_board_index = *state.current_board.lock().expect("Modifying current board.");
+
+    // Get the current board from the play_boards vector
+    let mut current_board = state.play_boards[current_board_index].clone();
+
+    // Generate the solution for the current board
+    let solution = generate_solve_board(&mut current_board);
+
+    // Render the solution HTML
+    Html(render!(solution_board(), board => solution))
 }
+

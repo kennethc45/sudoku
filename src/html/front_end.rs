@@ -15,6 +15,15 @@ pub fn start_page() -> &'static str {
 pub fn new_board() -> &'static str {
     return r#"
         <!doctype html>
+        <head>
+            <style>
+                td {
+                    padding: 10px;
+                    border-spacing: 20px;
+                    border: 1px solid black;
+                }
+            </style>
+        </head>
         <title> Sudoku </title>
         <h1> Sudoku </h1>
         <table>
@@ -50,6 +59,15 @@ pub fn new_board() -> &'static str {
 pub fn solution_board() -> &'static str {
     return r#"
         <!doctype html>
+        <head>
+            <style>
+                td {
+                    padding: 10px;
+                    border-spacing: 20px;
+                    border: 1px solid black;
+                }
+            </style>
+        </head>
         <title> Sudoku </title>
         <h1> Sudoku </h1>
         <table>

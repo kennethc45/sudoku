@@ -40,6 +40,10 @@ pub fn new_board() -> &'static str {
         <form action="http://127.0.0.1:3000/">
             <button type="submit"> Return to Home </button>
         </form>
+        <p></p>
+        <form action="http://127.0.0.1:3000/solution">
+            <button type="submit"> Show Solution </button>
+        </form>
     "#;
 }
 
@@ -57,7 +61,6 @@ pub fn solution_board() -> &'static str {
                 </tr>
             {% endfor %}
         </table>
-
     "#;
 }
 

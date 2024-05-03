@@ -2,40 +2,6 @@ use rand::Rng;
 use crate::setup::utilities::{valid, box_compatible, column_compatible, determine_quad, produce_indexes, check_spot_occupied, every_spot_full, valid_board, print_board};
 use crate::setup::solvability_check::generate_solve_board;
 
-//Used to make boards easier 
-pub fn change_level(board: &mut Vec<Vec<u32>>, level: u32) -> Vec<Vec<u32>> {
-    //New mutable version of the board that will be changed to be easier
-    let mut new_board = board.clone();
-    
-    //Turning the level into the number of additional clues it gets
-    let num_additional_clues = match level {
-        1 => 27,
-        2 => 18,
-        _ => 0
-    };
-
-    //Finding the solution to the provided board
-    let solution = generate_solve_board(board);
-
-    let mut valid_placement = false;
-
-    //Iterating through and picking random unfilled spots from the solution to fill in on the board
-    for _ in 0..num_additional_clues {
-        valid_placement = false;
-        while !valid_placement {
-            let row = rand::thread_rng().gen_range(0..9);
-            let col = rand::thread_rng().gen_range(0..9);
-    
-            if new_board[row][col] == 0 {
-                new_board[row][col] = solution[row][col];
-                valid_placement = true;
-            }
-        }
-    }
-
-    new_board
-}
-
 //Starts the search for the clues
 fn generate_eighteen_clues() -> Vec<Vec<u32>> {
     let mut clues: Vec<((usize, usize), u32)> = Vec::new();
@@ -50,24 +16,26 @@ fn generate_eighteen_clues() -> Vec<Vec<u32>> {
     final_board
 }
 
-pub fn generate_solvable_clues() -> Vec<Vec<u32>> {
+pub fn generate_solvable_clues() -> (Vec<Vec<u32>>, Vec<Vec<u32>>)  {
     let mut board_found = false;
     let mut clues_for_display: Vec<Vec<u32>> = Vec::new();
+    let mut solved_board: &Vec<Vec<u32>>  = &Vec::new();
+    let mut generated_clues: Vec<Vec<u32>> = Vec::new();
 
     //Goes until it a valid & solvable board has been produced
     while !board_found {
         //Generates the hints
-        let mut generated_clues = generate_eighteen_clues();
+        generated_clues = generate_eighteen_clues();
         //Keeps a copy for displaying before handing it off to the solveable function
         clues_for_display = generated_clues.clone();
         //Attempts to solve the board based on the clues
-        let solved_board = generate_solve_board(&mut generated_clues);
+        solved_board = generate_solve_board(&mut generated_clues);
         //If it gives back a fully filled and valid board its done
         if every_spot_full(solved_board) && valid_board(solved_board) {
             board_found = true;
         }
     }
-    clues_for_display
+    (clues_for_display, solved_board.clone())
 }
 
 fn clues_recursive_helper (quad: u32, clues: &mut Vec<((usize, usize), u32)>, mut remaining_nums: Vec<u32>, num_clues: usize) -> Vec<Vec<u32>> {

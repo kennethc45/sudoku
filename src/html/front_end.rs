@@ -43,6 +43,40 @@ pub fn new_board() -> &'static str {
             {% endfor %}
         </table>
         <p></p>
+        <h3> Request a Hint </h3>
+        <label for="requested_row"> Row: </label>
+        <input type="text" id="requested_row"> 
+        <label for="requested_col"> Column: </label>
+        <input type="text" id="requested_col">
+        <button onclick="submitCoords()"> Request Hint </button>
+        <p id="hint_display_area"> </p>
+        <script>
+            async function submitCoords() {
+                const row = document.getElementById("requested_row").value;
+                const col = document.getElementById("requested_col").value;
+                
+                if (isNaN(row) || isNaN(col)) {
+                    document.getElementById("hint_display_area").innerHTML = "Please only enter numbers.";
+                }
+                else {
+                    if (row > 9 || row < 1 || col > 9 || col < 1) {
+                        document.getElementById("hint_display_area").innerHTML = "Please enter coordinates between 1 and 9.";
+                    }
+                    else {
+                        const url = "http://127.0.0.1:3000/get_hint/" + row + "/" + col + "";
+                        fetch(url).then(result => result.json()).then(value => {
+                            if (value == 0){
+                                document.getElementById("hint_display_area").innerHTML = "Error retrieving the requested hint."
+                            }
+                            else {
+                                document.getElementById("hint_display_area").innerHTML = "[" + row + "] [" + col + "] is " + value + ".";
+                            }
+                        });
+                    }
+                }
+            }
+        </script>
+        <p></p>
         <form>
             {% if difficulty == 1 %}
                 <button type="submit" formaction="http://127.0.0.1:3000/new_game/1"> New Board </button>
@@ -89,6 +123,7 @@ pub fn solution_board() -> &'static str {
                 </tr>
             {% endfor %}
         </table>
+        <p></p>
         <button onclick="goBack()">
             Return to game 
         </button>

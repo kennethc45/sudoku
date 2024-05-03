@@ -2,9 +2,10 @@ mod setup;
 mod tests;
 mod html;
 
+use axum::extract::Query;
 use setup::solvability_check::generate_solve_board;
 use setup::board_generation::{generate_solvable_clues, change_level};
-use setup::utilities::{valid_board, valid};
+use setup::utilities::{valid_board, valid, print_board};
 use html::front_end::{new_board, solution_board, start_page};
 
 use std::cmp::Ordering;
@@ -64,6 +65,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(handle_start))
         .route("/new_game/:level", get(handle_new_board))
+        .route("/get_hint/:x/:y", get(handle_hint))
         .route("/spot_check", post(spot_check))
         .route("/win_check", post(win_check))
         .route("/solution", get(return_solution))
@@ -101,27 +103,10 @@ async fn spot_check(data: axum::extract::Json<Input>) -> impl IntoResponse{
         value,
         board: SudokuBoard { board }
     } = data.0;
+    
+    let is_valid:bool = valid(&board, value, (x, y));
 
-    // Keep for reference for postman testing
-    // let mut board: Vec<Vec<u32>> = vec![
-    
-    //             vec![0,0,2, 0,0,0, 0,3,0],
-    //             vec![0,4,0, 3,0,0, 6,0,0],
-    //             vec![0,0,0, 0,2,0, 0,0,0],
-    
-    //             vec![0,0,4, 0,0,0, 0,0,5],
-    //             vec![0,0,0, 0,8,0, 0,0,7],
-    //             vec![8,0,0, 0,1,0, 0,0,0],
-    
-    //             vec![0,0,0, 0,0,0, 0,5,9],
-    //             vec![0,9,0, 0,0,1, 0,0,0],
-    //             vec![0,0,7, 0,6,0, 0,0,0]
-    //         ];
-
-    
-            let is_valid:bool = valid(&board, value, (x, y));
-
-            Json(is_valid)
+    Json(is_valid)
 }
 
 // Checks if the board is a valid solution.
@@ -171,8 +156,26 @@ async fn handle_new_board(Path(level): Path<u32>, State(state): State<AppState>)
     Html(render!(new_board(), board => current_board, difficulty => level))
 }
 
+//Displays the basic html home page
 async fn handle_start() -> impl IntoResponse {
     Html(render!(start_page()))
+}
+
+//Takes a row and column and returns to the user the answer for that spot
+async fn handle_hint(Path((row, col)): Path<(u32, u32)>, State(state): State<AppState>) -> Json<u32> {
+    //Does another check to see if the values are within the board bounds
+    if row > 9 || row < 1 || col > 9 || col < 1 {
+        Json(0)
+    }
+    else {
+        //Looks up the current board index, board, and solution
+        let board_index = state.current_board.lock().expect("Accessing current board index.");
+        let mut board = state.play_boards.get(*board_index).unwrap().to_vec();
+        let solution = generate_solve_board(&mut board);
+
+        //Returns the value at the requested spot from the solution
+        Json(solution[(row-1) as usize][(col-1) as usize])
+    }
 }
 
 async fn return_solution(State(state): State<AppState>) -> impl IntoResponse {
@@ -187,4 +190,3 @@ async fn return_solution(State(state): State<AppState>) -> impl IntoResponse {
     // Render the solution HTML
     Html(render!(solution_board(), board => solution))
 }
-

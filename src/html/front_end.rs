@@ -43,6 +43,15 @@ pub fn new_board() -> &'static str {
             {% endfor %}
         </table>
         <p></p>
+        <h3> Enter a coordinate and a value</h3>
+        <label for="x_cooridinate">X_Coordinate:</label>
+        <input type="text" id="x_coordinate">
+        <label for="y_coordinate">Y_Coordinate:</label>
+        <input type="text" id="y_coordinate">
+        <label for="enter_value">Value:</label>
+        <input for="text" id="enter_value">
+        <button onclick="submitCoords()"
+
         <h3> Request a Hint </h3>
         <label for="requested_row"> Row: </label>
         <input type="text" id="requested_row"> 

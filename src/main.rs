@@ -2,23 +2,29 @@ mod setup;
 mod tests;
 mod html;
 
-use axum::extract::Query;
-use setup::solvability_check::generate_solve_board;
-use setup::board_generation::{generate_solvable_clues, change_level};
+use axum::error_handling::HandleErrorLayer;
+
+use axum::http::{Method, StatusCode, Uri};
+use setup::board_generation::generate_solvable_clues;
 use setup::utilities::{valid_board, valid, print_board};
 use html::front_end::{new_board, solution_board, start_page};
 
 use std::cmp::Ordering;
 use std::sync::{Arc, Mutex, MutexGuard};
+use std::time::Duration;
 
 use axum::response::{IntoResponse, Html};
-use axum::Json;
+use axum::{BoxError, Json};
 use axum::{routing::{get, post}, Router, extract::{State, Path}};
 
 use minijinja::render;
 
 use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
+
+use tower::ServiceBuilder;
+
+use rand::Rng;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Level {
@@ -30,6 +36,7 @@ pub enum Level {
 #[derive(Clone)]
 struct AppState {
     play_boards: Vec<Vec<Vec<u32>>>,
+    play_solutions: Vec<Vec<Vec<u32>>>,
     current_board: Arc<Mutex<usize>>,
     difficulty: Arc<Mutex<Level>>,
     board_progress: Arc<Mutex<Vec<Vec<u32>>>>
@@ -39,12 +46,17 @@ struct AppState {
 async fn main() {
     //Creating the boards and updating the state to hold them and the current board the user is on
     let mut boards: Vec<Vec<Vec<u32>>> = Vec::new();
+    let mut solutions: Vec<Vec<Vec<u32>>> = Vec::new();
+
     for _ in 0..100 {
-        boards.push(generate_solvable_clues());
+        let generated_board = generate_solvable_clues();
+        boards.push(generated_board.0);
+        solutions.push(generated_board.1);
     }
 
     let state = AppState {
         play_boards: boards.clone(),
+        play_solutions: solutions,
         current_board: Arc::new(Mutex::new(0)),
         difficulty: Arc::new(Mutex::new(Level::Hard)),
         board_progress: Arc::new(Mutex::new(boards.get(0).unwrap().to_vec()))
@@ -61,6 +73,11 @@ async fn main() {
 
     println!("Listening on {}", listener.local_addr().unwrap());
 
+    let mid = ServiceBuilder::new()
+        .layer(HandleErrorLayer::new(handle_timeout))
+        .timeout(Duration::from_secs(30));
+        
+
     // Defined endpoints 
     let app = Router::new()
         .route("/", get(handle_start))
@@ -69,12 +86,24 @@ async fn main() {
         .route("/spot_check", post(spot_check))
         .route("/win_check", post(win_check))
         .route("/solution", get(return_solution))
+        .layer(mid.into_inner())
         .with_state(state);
 
     // Launches the local server
     axum::serve(listener, app)
         .await
         .expect("Error serving application")
+}
+
+async fn handle_timeout(_method: Method, _uri: Uri, err: BoxError) -> (StatusCode, String) {
+    if err.is::<tower::timeout::error::Elapsed>() {
+        println!("timemout");
+        (StatusCode::REQUEST_TIMEOUT, "Timeout".to_string())
+    }
+    else {
+        println!("Error Type: {}", err);
+        (StatusCode::INTERNAL_SERVER_ERROR, format!("Error Type: {}", err))
+    }
 }
 
 
@@ -132,7 +161,7 @@ async fn handle_new_board(Path(level): Path<u32>, State(state): State<AppState>)
     };
 
     let mut current_board_index:MutexGuard<usize> = state.current_board.lock().expect("Modifying current board index.");
-    
+
     //Handles incrementing to the next board and wrapping around when the user goes through all of them
     if current_board_index.cmp(&99) == Ordering::Equal{
         *current_board_index = 0;
@@ -141,11 +170,32 @@ async fn handle_new_board(Path(level): Path<u32>, State(state): State<AppState>)
         *current_board_index = *current_board_index + 1;
     }
 
-    //Looking up the current board
+    //Looking up the current board and solution
     let mut current_board: Vec<Vec<u32>> = state.play_boards.get(*current_board_index).unwrap().to_vec();
+    let current_solution: Vec<Vec<u32>> = state.play_solutions.get(*current_board_index).unwrap().to_vec();
 
-    //Making the board easier based on the choosen level
-    current_board = change_level(&mut current_board, level);
+    //Determining number of clues to add based on chosen level
+    let num_additional_clues = match level {
+        1 => 27,
+        2 => 18,
+        _ => 0
+    };
+
+    let mut valid_placement = false;
+        
+    //Iterating through and picking random unfilled spots from the solution to fill in on the board
+    for _ in 0..num_additional_clues {
+        valid_placement = false;
+        while !valid_placement {
+            let row = rand::thread_rng().gen_range(0..9);
+            let col = rand::thread_rng().gen_range(0..9);
+    
+            if current_board[row][col] == 0 {
+                current_board[row][col] = current_solution[row][col];
+                valid_placement = true;
+            }
+        }
+    }
 
     //Updating the state to reflect the board's new difficulty
     let mut board_progress:MutexGuard<Vec<Vec<u32>>> = state.board_progress.lock().expect("Modifying board progress");
@@ -170,8 +220,7 @@ async fn handle_hint(Path((row, col)): Path<(u32, u32)>, State(state): State<App
     else {
         //Looks up the current board index, board, and solution
         let board_index = state.current_board.lock().expect("Accessing current board index.");
-        let mut board = state.play_boards.get(*board_index).unwrap().to_vec();
-        let solution = generate_solve_board(&mut board);
+        let solution = state.play_solutions.get(*board_index).unwrap().to_vec();
 
         //Returns the value at the requested spot from the solution
         Json(solution[(row-1) as usize][(col-1) as usize])
@@ -182,10 +231,10 @@ async fn return_solution(State(state): State<AppState>) -> impl IntoResponse {
     let current_board_index = *state.current_board.lock().expect("Accessing current board index.");
 
     // Get the current board from the play_boards vector
-    let mut current_board = state.play_boards[current_board_index].clone();
+    let solution = state.play_solutions[current_board_index].clone();
 
-    // Generate the solution for the current board
-    let solution = generate_solve_board(&mut current_board);
+    print_board(&state.play_boards[current_board_index].clone());
+    print_board(&solution);
 
     // Render the solution HTML
     Html(render!(solution_board(), board => solution))

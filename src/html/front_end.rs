@@ -43,6 +43,7 @@ pub fn new_board() -> &'static str {
             {% endfor %}
         </table>
         <p></p>
+
         <h3> Enter a coordinate and a value </h3>
         <label for="x_coordinate">X_Coordinate:</label>
         <input type="text" id="x_coordinate">
@@ -63,15 +64,17 @@ pub fn new_board() -> &'static str {
                     console.log(value_data);
                     console.log(boardData);
 
-                    if (value_data < 0 || value_data > 9 || isNaN(value_data)) {
-                        document.getElementById("response_area").innerHTML = "Values can only be between 0 and 9!";
-                    } else if (x_coord < 0 || x_coord > 8 || y_coord < 0 || y_coord > 8 || isNaN(x_coord) || isNaN(y_coord)) {
-                        document.getElementById("response_area").innerHTML = "Coordinates can only be between 0 and 9!";
+
+                    if (value_data < 1 || value_data > 9 || isNaN(value_data)) {
+                        document.getElementById("response_area").innerHTML = "Values can only be between 1 and 9!";
+                    } else if (x_coord < 1 || x_coord > 9 || y_coord < 1 || y_coord > 9 || isNaN(x_coord) || isNaN(y_coord)) {
+                        document.getElementById("response_area").innerHTML = "Coordinates can only be between 1 and 9!";
                     } else {
                         const inputData = {
                             coordinates: {
-                                x: x_coord,
-                                y: y_coord
+                                x: x_coord - 1,
+                                y: y_coord - 1
+
                             },
                             value: value_data,
                             board: {
@@ -100,7 +103,9 @@ pub fn new_board() -> &'static str {
                             
                             if (data == true) {
                                 console.log('Board updates!')
-                                boardData[x_coord][y_coord] = value_data;
+
+                                boardData[x_coord - 1][y_coord - 1] = value_data;
+
                                 updateHTMLTable();
                                 console.log(boardData)
                                 document.getElementById("response_area").innerHTML = "Valid!";
@@ -163,6 +168,7 @@ pub fn new_board() -> &'static str {
         </script>
 
         <button onclick="check_completed()"> Check if you won </button>
+
 
         <h3> Request a Hint </h3>
         <label for="requested_row"> Row: </label>

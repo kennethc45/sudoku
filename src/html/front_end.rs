@@ -63,59 +63,57 @@ pub fn new_board() -> &'static str {
                     console.log(value_data);
                     console.log(boardData);
 
-                    if (value_data < 0 || value_data > 9) {
+                    if (value_data < 0 || value_data > 9 || isNaN(value_data)) {
                         document.getElementById("response_area").innerHTML = "Values can only be between 0 and 9!";
-                    }
-
-                    if (x_coord < 0 || x_coord > 8 || y_coord < 0 || y_coord > 8) {
+                    } else if (x_coord < 0 || x_coord > 8 || y_coord < 0 || y_coord > 8 || isNaN(x_coord) || isNaN(y_coord)) {
                         document.getElementById("response_area").innerHTML = "Coordinates can only be between 0 and 9!";
-                    }
-
-                    const inputData = {
-                        coordinates: {
-                            x: x_coord,
-                            y: y_coord
-                        },
-                        value: value_data,
-                        board: {
-                            board: boardData
+                    } else {
+                        const inputData = {
+                            coordinates: {
+                                x: x_coord,
+                                y: y_coord
+                            },
+                            value: value_data,
+                            board: {
+                                board: boardData
+                            }
                         }
-                    }
-
-                    console.log(inputData)
-                    
-                    fetch("http://127.0.0.1:3000/spot_check", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(inputData),
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Received data: ', data)
-
+    
+                        console.log(inputData)
                         
-                        if (data == true) {
-                            console.log('Board updates!')
-                            boardData[x_coord][y_coord] = value_data;
-                            updateHTMLTable();
-                            console.log(boardData)
-                            document.getElementById("response_area").innerHTML = "Valid!";
-                        } else {
-                            console.log('Board will not update!')
-                            document.getElementById("response_area").innerHTML = "Not Valid!";
-                        }
-                        
-                    })
-                    .catch(error => {
-                        console.log('Error: ', error);
-                    });
+                        fetch("http://127.0.0.1:3000/spot_check", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(inputData),
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Received data: ', data)
+    
+                            
+                            if (data == true) {
+                                console.log('Board updates!')
+                                boardData[x_coord][y_coord] = value_data;
+                                updateHTMLTable();
+                                console.log(boardData)
+                                document.getElementById("response_area").innerHTML = "Valid!";
+                            } else {
+                                console.log('Board will not update!')
+                                document.getElementById("response_area").innerHTML = "Not Valid!";
+                            }
+                            
+                        })
+                        .catch(error => {
+                            console.log('Error: ', error);
+                        });
+                    }
                 }
 
                 function updateHTMLTable() {

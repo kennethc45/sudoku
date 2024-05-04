@@ -126,7 +126,37 @@ pub fn new_board() -> &'static str {
                         }
                     }
                 }
+
+                function check_completed() {
+                    const inputData = {
+                        board: boardData
+                    }
+
+                    fetch("http://127.0.0.1:3000/win_check", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(inputData),
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if(data) document.getElementById("response_area").innerHTML = "You win!";
+                        else document.getElementById("response_area").innerHTML = "Not won yet!";
+                    })
+                    .catch(error => {
+                        console.log('Error: ', error);
+                    });
+
+                }
         </script>
+
+        <button onclick="check_completed()"> Check if you won </button>
 
         <h3> Request a Hint </h3>
         <label for="requested_row"> Row: </label>

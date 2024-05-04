@@ -153,7 +153,7 @@ async fn handle_new_board(Path(level): Path<u32>, State(state): State<AppState>)
     *board_progress = current_board.clone();
 
     //Rendering the page with the board
-    Html(render!(new_board(&current_board), board => current_board, difficulty => level))
+    Html(render!(new_board(), board => current_board, difficulty => level))
 }
 
 //Displays the basic html home page

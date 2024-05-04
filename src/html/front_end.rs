@@ -54,17 +54,16 @@ pub fn new_board() -> &'static str {
         <button onclick="updateBoard()"> Update Board </button>
         <p id="response_area"></p>
         <script>
+                let boardData = JSON.parse('{{ board | e }}');
                 async function updateBoard() {
                     const x_coord = parseInt(document.getElementById("x_coordinate").value);
                     const y_coord = parseInt(document.getElementById("y_coordinate").value);
                     const value_data = parseInt(document.getElementById("enter_value").value);
-                    var boardData = JSON.parse('{{ board | e }}');
+                    // var boardData = JSON.parse('{{ board | e }}');
                     console.log(x_coord);
                     console.log(y_coord);
                     console.log(value_data);
                     console.log(boardData);
-
-                    
 
                     const inputData = {
                         coordinates: {
@@ -99,7 +98,8 @@ pub fn new_board() -> &'static str {
                         if (data == true) {
                             console.log('Board updates!')
                             boardData[x_coord][y_coord] = value_data;
-                            updateHTMLTable(boardData);
+                            updateHTMLTable();
+                            console.log(boardData)
                             document.getElementById("response_area").innerHTML = "Valid!";
                         } else {
                             console.log('Board will not update!')
@@ -111,12 +111,14 @@ pub fn new_board() -> &'static str {
                         console.log('Error: ', error);
                     });
                 }
-                const table = document.querySelector('table');
-                function updateHTMLTable(boardData) {
+
+                function updateHTMLTable() {
+                    console.log('Calling updateHTMLTable!')
+                    const table = document.querySelector('table');
                     for (let i = 0; i < 9; i++) {
                         for (let j = 0; j < 9; j++) {
                             const cell = table.rows[i].cells[j];
-                            cell.textContent = boardData[i][j];          
+                            cell.textContent = boardData[i][j];
                         }
                     }
                 }

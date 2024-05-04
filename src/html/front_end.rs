@@ -51,6 +51,7 @@ pub fn new_board() -> &'static str {
         <label for="enter_value">Value:</label>
         <input type="text" id="enter_value">
         <button onclick="updateBoard()"> Update Board </button>
+        <p id="response_area"></p>
         <script>
                 async function updateBoard() {
                     const x_coord = parseInt(document.getElementById("x_coordinate").value);
@@ -90,11 +91,32 @@ pub fn new_board() -> &'static str {
                     })
                     .then(data => {
                         console.log('Received data: ', data)
+
+                        
+                        if (data == true) {
+                            console.log('Board updates!')
+                            boardData[x_coord][y_coord] = value_data;
+                            updateHTMLTable(boardData);
+                            document.getElementById("response_area").innerHTML = "Valid!";
+                        } else {
+                            console.log('Board will not update!')
+                            document.getElementById("response_area").innerHTML = "Not Valid!";
+                        }
+                        
                     })
                     .catch(error => {
                         console.log('Error: ', error);
                     });
-                    
+                }
+
+                function updateHTMLTable(boardData) {
+                    const table = document.querySelector('table');
+                    for (let i = 0; i < 9; i++) {
+                        for (let j = 0; j < 9; j++) {
+                            const cell = table.rows[i].cells[j];
+                            cell.textContent = boardData[i][j];
+                        }
+                    }
                 }
         </script>
 

@@ -71,8 +71,8 @@ pub fn new_board() -> &'static str {
                     } else {
                         const inputData = {
                             coordinates: {
-                                x: x_coord,
-                                y: y_coord
+                                x: x_coord - 1,
+                                y: y_coord - 1
                             },
                             value: value_data,
                             board: {

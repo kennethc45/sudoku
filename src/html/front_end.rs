@@ -58,11 +58,18 @@ pub fn new_board() -> &'static str {
                     const x_coord = parseInt(document.getElementById("x_coordinate").value);
                     const y_coord = parseInt(document.getElementById("y_coordinate").value);
                     const value_data = parseInt(document.getElementById("enter_value").value);
-                    // var boardData = JSON.parse('{{ board | e }}');
                     console.log(x_coord);
                     console.log(y_coord);
                     console.log(value_data);
                     console.log(boardData);
+
+                    if (value_data < 0 || value_data > 9) {
+                        document.getElementById("response_area").innerHTML = "Values can only be between 0 and 9!";
+                    }
+
+                    if (x_coord < 0 || x_coord > 8 || y_coord < 0 || y_coord > 8) {
+                        document.getElementById("response_area").innerHTML = "Coordinates can only be between 0 and 9!";
+                    }
 
                     const inputData = {
                         coordinates: {

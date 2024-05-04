@@ -10,7 +10,6 @@ pub fn generate_solve_board(board: &mut Vec<Vec<u32>>) -> &Vec<Vec<u32>>{
             }
         }
     }
-
     return solving_recursive_helper(board,(0,0), hints, false, 0)
 }
 

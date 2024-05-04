@@ -64,6 +64,7 @@ pub fn new_board() -> &'static str {
                     console.log(value_data);
                     console.log(boardData);
 
+
                     if (value_data < 1 || value_data > 9 || isNaN(value_data)) {
                         document.getElementById("response_area").innerHTML = "Values can only be between 1 and 9!";
                     } else if (x_coord < 1 || x_coord > 9 || y_coord < 1 || y_coord > 9 || isNaN(x_coord) || isNaN(y_coord)) {
@@ -73,6 +74,7 @@ pub fn new_board() -> &'static str {
                             coordinates: {
                                 x: x_coord - 1,
                                 y: y_coord - 1
+
                             },
                             value: value_data,
                             board: {
@@ -101,7 +103,9 @@ pub fn new_board() -> &'static str {
                             
                             if (data == true) {
                                 console.log('Board updates!')
+
                                 boardData[x_coord - 1][y_coord - 1] = value_data;
+
                                 updateHTMLTable();
                                 console.log(boardData)
                                 document.getElementById("response_area").innerHTML = "Valid!";
@@ -123,13 +127,49 @@ pub fn new_board() -> &'static str {
                     for (let i = 0; i < 9; i++) {
                         for (let j = 0; j < 9; j++) {
                             const cell = table.rows[i].cells[j];
-                            cell.textContent = boardData[i][j];
+                            // cell.textContent = boardData[i][j];
+                            const cellValue = boardData[i][j];
+                            if (cellValue == 0){
+                                cell.textContent = '';
+                            } else {
+                                cell.textContent = cellValue;
+                            }
                         }
                     }
                 }
+
+                function check_completed() {
+                    const inputData = {
+                        board: boardData
+                    }
+
+                    fetch("http://127.0.0.1:3000/win_check", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(inputData),
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if(data) document.getElementById("response_area").innerHTML = "You win!";
+                        else document.getElementById("response_area").innerHTML = "Not won yet!";
+                    })
+                    .catch(error => {
+                        console.log('Error: ', error);
+                    });
+
+                }
         </script>
 
-        <p></p>
+        <button onclick="check_completed()"> Check if you won </button>
+
+
         <h3> Request a Hint </h3>
         <label for="requested_row"> Row: </label>
         <input type="text" id="requested_row"> 

@@ -43,15 +43,86 @@ pub fn new_board() -> &'static str {
             {% endfor %}
         </table>
         <p></p>
-        <h3> Enter a coordinate and a value</h3>
-        <label for="x_cooridinate">X_Coordinate:</label>
+
+        <h3> Enter a coordinate and a value </h3>
+        <label for="x_coordinate">X_Coordinate:</label>
         <input type="text" id="x_coordinate">
         <label for="y_coordinate">Y_Coordinate:</label>
         <input type="text" id="y_coordinate">
         <label for="enter_value">Value:</label>
-        <input for="text" id="enter_value">
-        <button onclick="submitCoords()"
+        <input type="text" id="enter_value">
+        <button onclick="updateBoard()"> Update Board </button>
+        <p id="response_area"></p>
+        <script>
+                async function updateBoard() {
+                    const x_coord = parseInt(document.getElementById("x_coordinate").value);
+                    const y_coord = parseInt(document.getElementById("y_coordinate").value);
+                    const value_data = parseInt(document.getElementById("enter_value").value);
+                    var boardData = JSON.parse('{{ board | e }}');
+                    console.log(x_coord);
+                    console.log(y_coord);
+                    console.log(value_data);
+                    console.log(boardData);
 
+                    
+
+                    const inputData = {
+                        coordinates: {
+                            x: x_coord,
+                            y: y_coord
+                        },
+                        value: value_data,
+                        board: {
+                            board: boardData
+                        }
+                    }
+
+                    console.log(inputData)
+                    
+                    fetch("http://127.0.0.1:3000/spot_check", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(inputData),
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Received data: ', data)
+
+                        
+                        if (data == true) {
+                            console.log('Board updates!')
+                            boardData[x_coord][y_coord] = value_data;
+                            updateHTMLTable(boardData);
+                            document.getElementById("response_area").innerHTML = "Valid!";
+                        } else {
+                            console.log('Board will not update!')
+                            document.getElementById("response_area").innerHTML = "Not Valid!";
+                        }
+                        
+                    })
+                    .catch(error => {
+                        console.log('Error: ', error);
+                    });
+                }
+                const table = document.querySelector('table');
+                function updateHTMLTable(boardData) {
+                    for (let i = 0; i < 9; i++) {
+                        for (let j = 0; j < 9; j++) {
+                            const cell = table.rows[i].cells[j];
+                            cell.textContent = boardData[i][j];          
+                        }
+                    }
+                }
+        </script>
+
+        <p></p>
         <h3> Request a Hint </h3>
         <label for="requested_row"> Row: </label>
         <input type="text" id="requested_row"> 

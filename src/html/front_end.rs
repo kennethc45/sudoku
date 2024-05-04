@@ -122,7 +122,13 @@ pub fn new_board() -> &'static str {
                     for (let i = 0; i < 9; i++) {
                         for (let j = 0; j < 9; j++) {
                             const cell = table.rows[i].cells[j];
-                            cell.textContent = boardData[i][j];
+                            // cell.textContent = boardData[i][j];
+                            const cellValue = boardData[i][j];
+                            if (cellValue == 0){
+                                cell.textContent = '';
+                            } else {
+                                cell.textContent = cellValue;
+                            }
                         }
                     }
                 }

@@ -43,6 +43,91 @@ pub fn new_board() -> &'static str {
             {% endfor %}
         </table>
         <p></p>
+        <h3> Enter a coordinate and a value </h3>
+        <label for="x_coordinate">X_Coordinate:</label>
+        <input type="text" id="x_coordinate">
+        <label for="y_coordinate">Y_Coordinate:</label>
+        <input type="text" id="y_coordinate">
+        <label for="enter_value">Value:</label>
+        <input type="text" id="enter_value">
+        <button onclick="updateBoard()"> Update Board </button>
+        <p id="response_area"></p>
+        <script>
+                let boardData = JSON.parse('{{ board | e }}');
+                async function updateBoard() {
+                    const x_coord = parseInt(document.getElementById("x_coordinate").value);
+                    const y_coord = parseInt(document.getElementById("y_coordinate").value);
+                    const value_data = parseInt(document.getElementById("enter_value").value);
+                    console.log(x_coord);
+                    console.log(y_coord);
+                    console.log(value_data);
+                    console.log(boardData);
+
+                    if (value_data < 0 || value_data > 9 || isNaN(value_data)) {
+                        document.getElementById("response_area").innerHTML = "Values can only be between 0 and 9!";
+                    } else if (x_coord < 0 || x_coord > 8 || y_coord < 0 || y_coord > 8 || isNaN(x_coord) || isNaN(y_coord)) {
+                        document.getElementById("response_area").innerHTML = "Coordinates can only be between 0 and 9!";
+                    } else {
+                        const inputData = {
+                            coordinates: {
+                                x: x_coord,
+                                y: y_coord
+                            },
+                            value: value_data,
+                            board: {
+                                board: boardData
+                            }
+                        }
+    
+                        console.log(inputData)
+                        
+                        fetch("http://127.0.0.1:3000/spot_check", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(inputData),
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Received data: ', data)
+    
+                            
+                            if (data == true) {
+                                console.log('Board updates!')
+                                boardData[x_coord][y_coord] = value_data;
+                                updateHTMLTable();
+                                console.log(boardData)
+                                document.getElementById("response_area").innerHTML = "Valid!";
+                            } else {
+                                console.log('Board will not update!')
+                                document.getElementById("response_area").innerHTML = "Not Valid!";
+                            }
+                            
+                        })
+                        .catch(error => {
+                            console.log('Error: ', error);
+                        });
+                    }
+                }
+
+                function updateHTMLTable() {
+                    console.log('Calling updateHTMLTable!')
+                    const table = document.querySelector('table');
+                    for (let i = 0; i < 9; i++) {
+                        for (let j = 0; j < 9; j++) {
+                            const cell = table.rows[i].cells[j];
+                            cell.textContent = boardData[i][j];
+                        }
+                    }
+                }
+        </script>
+
         <h3> Request a Hint </h3>
         <label for="requested_row"> Row: </label>
         <input type="text" id="requested_row"> 

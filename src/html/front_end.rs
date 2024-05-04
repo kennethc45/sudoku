@@ -66,7 +66,7 @@ pub fn new_board() -> &'static str {
 
                     if (value_data < 1 || value_data > 9 || isNaN(value_data)) {
                         document.getElementById("response_area").innerHTML = "Values can only be between 1 and 9!";
-                    } else if (x_coord < 0 || x_coord > 9 || y_coord < 0 || y_coord > 9 || isNaN(x_coord) || isNaN(y_coord)) {
+                    } else if (x_coord < 1 || x_coord > 9 || y_coord < 1 || y_coord > 9 || isNaN(x_coord) || isNaN(y_coord)) {
                         document.getElementById("response_area").innerHTML = "Coordinates can only be between 1 and 9!";
                     } else {
                         const inputData = {
